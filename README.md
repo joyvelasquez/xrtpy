@@ -44,8 +44,8 @@ XRT hold 9 different channels which convert to 15 different x-ray channel combin
 
 Referencing Narukage et al. (2011), the effective area [A eff] is giving by 
 
-	A_{eff} = $A$ $\times$ $T_{PF}$ $\times$ $R_{M1}$ $\times$ $R_{M2}$ $\times$ $T_{FPAF1}$ $\times$ $T_{FPAF2}$ $\times$ $QE_{CCD}$
-
+	
+	https://latex.codecogs.com/gif.download?A_%7Beff%7D%20%3D%20A%20%5Ctimes%20T_%7BPF%7D%20%5Ctimes%20R_%7BM1%7D%20%5Ctimes%20R_%7BM2%7D%20%5Ctimes%20T_%7BFPAF1%7D%20%5Ctimes%20T_%7BFPAF2%7D%20%5Ctimes%20QE_%7BCCD%7D
 where: 
 - A Aperture
 - T_{PF} transmission of the pre-filter
