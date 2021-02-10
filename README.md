@@ -1,6 +1,6 @@
 # xrtpy
 
-===============
+
 Getting Started
 ===============
 
@@ -34,13 +34,11 @@ Samples
 Sample section contains examples on how to use xrtpy to compute XRT data
 
 
-Calculating Wavelength Response Function
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+### Calculating Wavelength Response Function
+
 
 The effective area is computed for a set of XRT x-ray channels [units [cm^2]
- as a function of wavelength [A] ]. This can be computed for ever x-ray channel.  
-
-
+as a function of wavelength [A] ]. This can be computed for ever x-ray channel.  
 XRT hold 9 different channels which convert to 15 different x-ray channel combination. 
 
 
@@ -63,13 +61,18 @@ The effective area can be calculation for all channels.
 
 Plan Functionality
 ------------------
-xrtpy response 
-	xrtpy wave response 
-		Produce the effective areas and spectral responses for a set of 
-		XRT x-ray channels, accounting for some thickness of the CCD
-		contamination layer. 
-	xrtpy temperature response 
-		Produce the temperature response for each XRT x-ray channel,
-		assuming a spectral emission model. 
+
+xrtpy response
+ 
+- xrtpy wave response 
+
+	- Produce the effective areas and spectral responses for a set of 
+	  XRT x-ray channels, accounting for some thickness of the CCD
+	  contamination layer. 
+	
+- xrtpy temperature response
+ 
+	- Produce the temperature response for each XRT x-ray channel,
+	  assuming a spectral emission model. 
 
 
