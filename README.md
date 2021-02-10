@@ -7,8 +7,8 @@ Getting Started
 XRTpy is a Python Package for analyzing data from the X-Ray Telescope (XRT)
 instrument onboard the Hinode spacecraft. XRTpy creation began early 2021. 
 XRTpy motivation is allow users to freely use XRT data using Python. 
-XRTpy will make use of SunPy, an open-source Python library for Solar
-Physics data analysis and visualization.
+XRTpy will make use of SunPy**[Sunpy](https://sunpy.org/)** , an 
+open-source Python library for Solar Physics data analysis and visualization.
 
 
 About XRT
@@ -47,11 +47,11 @@ Referencing Narukage et al. (2011), the effective area [A eff] is giving by
 	$A_{eff}$= $A$ $\times$ $T_{PF}$ $\times$ $R_{M1}$ $\times$ $R_{M2}$ $\times$ $T_{FPAF1}$ $\times$ $T_{FPAF2}$ $\times$ $QE_{CCD}$
 
 where: 
-- $A$ Aperture
-- $T_{PF}$ transmission of the pre-filter
-- $R_{M1} , R_{M2}$ selectivities at the primary and secondary mirrors
-- $T_{FPAF1}, T_{FPAF2}$ transmission of the focal-plane filters 
-- $QE_{CCD}$ quantum efficiency of the CCD
+- A Aperture
+- T_{PF} transmission of the pre-filter
+- R_{M1} , R_{M2} selectivities at the primary and secondary mirrors
+- T_{FPAF1}, T_{FPAF2} transmission of the focal-plane filters 
+- QE_{CCD} quantum efficiency of the CCD
 
 
 The effective area can be calculation for all channels. 
