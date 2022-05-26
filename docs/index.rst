@@ -16,7 +16,7 @@ The X-Ray Telescope (XRT) is one of three instruments onboard the Hinode spacecr
 Hinode was launched on September 23, 2006 as a joint mission between the space agencies of Europe, Japan, United Kingdom, and United states. Hinode's mission is to capture multi-wavelength data from the photosphere to the upper corona. XRT provides data of coronal plasmas from 1 to approximately 20 million K with 2’’ resolution (~1’’ pixels). 
 
 XRT Filter
-—----------
+==========
 The XRT images through nine X-ray filters using two filter wheels. Filter wheel 1 contains the following filters: Open, Al-ploy, C-poly, Be-thin, Be-med, Al-med. Filter wheel 2 contains: Open, Al-mesh, Ti-poly, Gband, Al-Thick, Be-thick. 
 
 
