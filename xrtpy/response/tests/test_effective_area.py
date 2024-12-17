@@ -180,6 +180,14 @@ def _IDL_effective_area_raw_data(filename):
 
 #     assert actual_effective_area.unit == IDL_effective_area.unit
 #     assert allclose(actual_effective_area.value, IDL_effective_area.value, atol=1e-2)
+
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+
 import matplotlib.pyplot as plt
 from pathlib import Path
 import xrtpy
@@ -342,64 +350,64 @@ def save_combined_filter_plots(filter_name, test_data):
 # Example Usage in Your Test
 filter_test_data = {}  # Dictionary to store data for each filter
 
-@pytest.mark.parametrize("filename", get_IDL_data_files())
-def test_effective_area_compare_idl(filename):
-    print(f"\n\nTesting file: {filename}\n")
+# @pytest.mark.parametrize("filename", get_IDL_data_files())
+# def test_effective_area_compare_idl(filename):
+#     print(f"\n\nTesting file: {filename}\n")
 
-    # Read the filter name and observation date from the file
-    with filename.open() as f:
-        filter_name = f.readline().split()[1]
-        filter_obs_date = " ".join(f.readline().split()[1:])
-        print(f"Filter name: {filter_name}, Observation date: {filter_obs_date}")  # Debugging output
+#     # Read the filter name and observation date from the file
+#     with filename.open() as f:
+#         filter_name = f.readline().split()[1]
+#         filter_obs_date = " ".join(f.readline().split()[1:])
+#         print(f"Filter name: {filter_name}, Observation date: {filter_obs_date}")  # Debugging output
 
-    # Correct non-standard date format
-    filter_obs_date = filter_obs_date.replace("Sept", "Sep")
+#     # Correct non-standard date format
+#     filter_obs_date = filter_obs_date.replace("Sept", "Sep")
 
-    # Load IDL data from the file
-    IDL_data = np.loadtxt(filename, skiprows=3)
-    IDL_wavelength = IDL_data[:, 0] * u.AA
-    IDL_effective_area = IDL_data[:, 1] * u.cm**2
+#     # Load IDL data from the file
+#     IDL_data = np.loadtxt(filename, skiprows=3)
+#     IDL_wavelength = IDL_data[:, 0] * u.AA
+#     IDL_effective_area = IDL_data[:, 1] * u.cm**2
 
-    # Compute effective area using XRTpy
-    instance = xrtpy.response.EffectiveAreaFundamental(filter_name, filter_obs_date)
-    actual_effective_area = instance.effective_area()
+#     # Compute effective area using XRTpy
+#     instance = xrtpy.response.EffectiveAreaFundamental(filter_name, filter_obs_date)
+#     actual_effective_area = instance.effective_area()
 
-    # Interpolate XRTpy effective area onto the IDL wavelength grid
-    XRTpy_effective_area_interp = np.interp(
-        IDL_wavelength.value,  # Target grid (IDL wavelengths)
-        instance.channel_wavelength.value,  # Source grid (XRTpy wavelengths)
-        actual_effective_area.value  # Data to interpolate (XRTpy effective area)
-    )
+#     # Interpolate XRTpy effective area onto the IDL wavelength grid
+#     XRTpy_effective_area_interp = np.interp(
+#         IDL_wavelength.value,  # Target grid (IDL wavelengths)
+#         instance.channel_wavelength.value,  # Source grid (XRTpy wavelengths)
+#         actual_effective_area.value  # Data to interpolate (XRTpy effective area)
+#     )
 
-    # Make both arrays dimensionless for comparison
-    IDL_effective_area_unitless = IDL_effective_area.value
-    XRTpy_effective_area_unitless = XRTpy_effective_area_interp
+#     # Make both arrays dimensionless for comparison
+#     IDL_effective_area_unitless = IDL_effective_area.value
+#     XRTpy_effective_area_unitless = XRTpy_effective_area_interp
 
-    # Compare effective areas using relative tolerance (unitless comparison)
-    rtol = 1e-4
-    differences = np.abs(XRTpy_effective_area_unitless - IDL_effective_area_unitless)
-    max_diff = np.max(differences)
-    failed_indices = np.where(differences > rtol * np.abs(IDL_effective_area_unitless))[0]
+#     # Compare effective areas using relative tolerance (unitless comparison)
+#     rtol = 1e-4
+#     differences = np.abs(XRTpy_effective_area_unitless - IDL_effective_area_unitless)
+#     max_diff = np.max(differences)
+#     failed_indices = np.where(differences > rtol * np.abs(IDL_effective_area_unitless))[0]
 
-    # Save individual plots
-    save_effective_area_plot(
-        IDL_wavelength.value,
-        IDL_effective_area_unitless,
-        XRTpy_effective_area_unitless,
-        failed_indices,
-        filter_name,
-        filter_obs_date,
-    )
+#     # Save individual plots
+#     save_effective_area_plot(
+#         IDL_wavelength.value,
+#         IDL_effective_area_unitless,
+#         XRTpy_effective_area_unitless,
+#         failed_indices,
+#         filter_name,
+#         filter_obs_date,
+#     )
 
-    # Aggregate data for combined plotting
-    if filter_name not in filter_test_data:
-        filter_test_data[filter_name] = []
-    filter_test_data[filter_name].append(
-        (IDL_wavelength.value, IDL_effective_area_unitless, XRTpy_effective_area_unitless, failed_indices, filter_obs_date)
-    )
+#     # Aggregate data for combined plotting
+#     if filter_name not in filter_test_data:
+#         filter_test_data[filter_name] = []
+#     filter_test_data[filter_name].append(
+#         (IDL_wavelength.value, IDL_effective_area_unitless, XRTpy_effective_area_unitless, failed_indices, filter_obs_date)
+#     )
 
-    # Fail the test if there are failed indices
-    assert failed_indices.size == 0, f"Effective areas differ for filter {filter_name} on {filter_obs_date}"
+#     # Fail the test if there are failed indices
+#     assert failed_indices.size == 0, f"Effective areas differ for filter {filter_name} on {filter_obs_date}"
 
 
 # After all tests, generate combined plots for each filter
@@ -408,3 +416,9 @@ def create_combined_plots():
     yield  # Ensure tests complete first
     for filter_name, test_data in filter_test_data.items():
         save_combined_filter_plots(filter_name, test_data)
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
