@@ -26,5 +26,5 @@ __all__ = [
     "EffectiveAreaFundamental",
     "TemperatureResponseFundamental",
     "temperature_from_filter_ratio",
-    "tools",
+    "tools"
 ]
