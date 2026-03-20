@@ -5,8 +5,6 @@ __all__ = [
 import logging
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
-
 import astropy.constants as const
 import numpy as np
 import scipy.io
