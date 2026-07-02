@@ -40,7 +40,6 @@ dynamic = [ "version" ]
 dependencies = [
   "astropy>=6",
   "lmfit>=1.2.2",
-  "lmfit>=1.2.2",
   "matplotlib>=3.7",
   "numpy>=1.24",
   "scikit-image>=0.21",
@@ -148,3 +147,14 @@ report.exclude_lines = [
   "ModuleNotFoundError",
   "raise NotImplementedError",
 ]
+
+[tool.ruff]
+target-version = "py311"
+
+[tool.ruff.lint]
+ignore = []
+
+[tool.ruff.lint.per-file-ignores]
+"xrtpy/xrt_dem_iterative/**/*.py" = ["B905", "BLE001", "C408", "F841", "FBT003", "ICN001", "PT006", "PLC0415"]
+"xrtpy/xrt_dem_iterative/test/utils_sav_io.py" = ["N815", "PERF203"]
+"xrtpy/xrt_dem_iterative/utils_sav_io.py" = ["N815", "PERF203"]
