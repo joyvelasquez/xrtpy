@@ -87,7 +87,7 @@ def read_mc_intensities_csv(csv_path: str | Path) -> MonteCarloInputs:
 
     mc_intensities = df[filters].to_numpy(dtype=float)  # (n_runs, n_filters)
 
-    # No NaNs - but shoudn't have any
+    # No NaNs - but shouldn't have any
     if not np.isfinite(mc_intensities).all():
         bad = np.where(~np.isfinite(mc_intensities))
         raise ValueError(f"Found non-finite intensity values at indices: {bad}")

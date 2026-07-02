@@ -19,10 +19,10 @@ Glossary
    DEM
       Differential Emission Measure (DEM) — a function that describes how much plasma is present along the line of sight as a function of temperature. See :ref:`xrtpy-dem-overview` for a detailed overview of DEM theory,
       usage, and the solver provided in XRTpy.
-   
+
    DEM Inversion
       The process of determining the temperature distribution of coronal plasma (the DEM) from a small number of filter intensities. Since more temperature bins are used than available filters, the problem is mathematically
-      underconstrained (“ill posed”), so regularization and smoothing are required to obtain a stable, physical solution.
+      underconstrained ("ill posed"), so regularization and smoothing are required to obtain a stable, physical solution.
 
 
    DN
@@ -52,7 +52,7 @@ Glossary
       Point Spread Function — describes the response of the telescope to a point source of light. In XRTpy, it is used in deconvolution routines to sharpen images.
 
    Response Matrix
-      A two-dimensional array containing the temperature response of each XRT filter interpolated onto the solver’s regular log10 temperature grid.This matrix connects 
+      A two-dimensional array containing the temperature response of each XRT filter interpolated onto the solver's regular log10 temperature grid.This matrix connects
       the DEM to the modeled filter intensities through the forward model:
 
       :math:`I_i^{model} = \sum_j DEM(T_j)\, R_i(T_j)\, T_j\, \Delta(\ln T)`.

@@ -12,24 +12,25 @@ Inputs
 - Observed intensities in DN/s/pix
 - Intensity uncertainties in DN/s/pix (optional)
 """
+
 from xrtpy.response.tools import generate_temperature_responses
 from xrtpy.xrt_dem_iterative import XRTDEMIterative
 
 # %%
 # 1) Choose filters + observation date
-filters = ["Al-mesh", "Al-poly","Be-thin","Be-thick","Al-med","Al-poly/Ti-poly"]
+filters = ["Al-mesh", "Al-poly", "Be-thin", "Be-thick", "Al-med", "Al-poly/Ti-poly"]
 observation_date = "2021-07-20T16:04"
 
 # %%
 # 2) Provide observed intensities (DN/s/pix)
 # Replace these with values measured from your data (per filter).
 intensities = [
-    362.382339, #Al-mesh
-    181.407312, #Al-poly
-    148.933070, #Be-thin
-    0.002636,   #Be-thick
-    1.459830,   #Al-med
-    45.390125  #Al-poly/Ti-poly
+    362.382339,  # Al-mesh
+    181.407312,  # Al-poly
+    148.933070,  # Be-thin
+    0.002636,  # Be-thick
+    1.459830,  # Al-med
+    45.390125,  # Al-poly/Ti-poly
 ]
 
 
@@ -55,8 +56,8 @@ dem_solver.solve()
 dem_solver.summary()
 
 # Access results directly for your own analysis:
-dem = dem_solver.dem        # DEM(T) array [cm^-5 K^-1]
-logT = dem_solver.logT      # log10 temperature grid [K]
+dem = dem_solver.dem  # DEM(T) array [cm^-5 K^-1]
+logT = dem_solver.logT  # log10 temperature grid [K]
 
 # %%
 # 6) Plot DEM

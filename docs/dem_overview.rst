@@ -40,7 +40,7 @@ Conceptually, the solver:
     4. Uses least-squares fitting (via ``lmfit``) to adjust the spline values so that the modeled filter intensities best match the observed intensities.
     5. Optionally performs Monte Carlo runs by perturbing the observed intensities with their uncertainties and re-solving the DEM many times to estimate uncertainties.
 
-This approach mirrors the structure and behavior of the IDL routine while providing a modern, 
+This approach mirrors the structure and behavior of the IDL routine while providing a modern,
 fully open-source implementation in Python that integrates naturally with the scientific Python ecosystem.
 
 Required inputs
@@ -77,7 +77,7 @@ Example
     responses = generate_temperature_responses(
         filters,
         "2012-07-10T12:03:20",
-        )
+    )
 
 
 3. Observed intensities
@@ -170,7 +170,7 @@ for each realization.
     dem_solver.solve()
 
     # Monte Carlo DEM Plot
-    dem_solver.plot_dem_mc()   # base DEM plus Monte Carlo curves
+    dem_solver.plot_dem_mc()  # base DEM plus Monte Carlo curves
 
 The arrays ``dem_solver.mc_dem``, ``dem_solver.mc_chisq``,
 ``dem_solver.mc_base_obs``, and ``dem_solver.mc_mod_obs`` are then available
@@ -259,7 +259,7 @@ The values shown match the current defaults and are written out for clarity.
     from xrtpy.xrt_dem_iterative import XRTDEMIterative
 
     filters = ["Al-poly", "Ti-poly", "Be-thin", "C-poly"]
-    #Example intensities
+    # Example intensities
     intensities = [520.0, 104.0, 901.0, 458.0]  # DN/s/pix
     observation_date = "2012-10-27T10:00:03"
 
@@ -269,18 +269,17 @@ The values shown match the current defaults and are written out for clarity.
     )
 
     dem_solver = XRTDEMIterative(
-        observed_channel=filters,              # Filter names
-        observed_intensities=intensities,      # Observed intensity values
-        temperature_responses=responses,       # Instrument responses
-
+        observed_channel=filters,  # Filter names
+        observed_intensities=intensities,  # Observed intensity values
+        temperature_responses=responses,  # Instrument responses
         # Optional configuration:
-        intensity_uncertainties=None,                 # Observed uncertainties - default: auto-estimated (3%)
-        minimum_bound_temperature=5.5,         # Minimum log T (default: 5.5)
-        maximum_bound_temperature=8.0,         # Maximum log T (default: 8.0)
-        logarithmic_temperature_step_size=0.1, # Bin width in log T (default: 0.1)
-        monte_carlo_runs=100,                  # Number of Monte Carlo runs (default: 0 -(disabled))
-        max_iterations=2000,                   # Solver max iterations (default: 2000)
-        normalization_factor=1e21,             # Normalization scaling factor (default: 1e21)
+        intensity_uncertainties=None,  # Observed uncertainties - default: auto-estimated (3%)
+        minimum_bound_temperature=5.5,  # Minimum log T (default: 5.5)
+        maximum_bound_temperature=8.0,  # Maximum log T (default: 8.0)
+        logarithmic_temperature_step_size=0.1,  # Bin width in log T (default: 0.1)
+        monte_carlo_runs=100,  # Number of Monte Carlo runs (default: 0 -(disabled))
+        max_iterations=2000,  # Solver max iterations (default: 2000)
+        normalization_factor=1e21,  # Normalization scaling factor (default: 1e21)
     )
 
     dem_solver.solve()
@@ -294,10 +293,10 @@ The values shown match the current defaults and are written out for clarity.
 
 .. Acknowledgement
 .. ---------------
-.. *Development of the DEM solver in XRTpy has been supported in part by 
-.. a NASA Heliophysics Tools and Methods (HTM) program grant (ROSES-2025, 
-.. element B.20). This effort reflects the ongoing transition of DEM 
-.. capabilities from legacy IDL routines into modern, open-source Python 
+.. *Development of the DEM solver in XRTpy has been supported in part by
+.. a NASA Heliophysics Tools and Methods (HTM) program grant (ROSES-2025,
+.. element B.20). This effort reflects the ongoing transition of DEM
+.. capabilities from legacy IDL routines into modern, open-source Python
 .. tools for the solar physics community.*
 
 

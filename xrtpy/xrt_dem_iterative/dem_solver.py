@@ -8,6 +8,7 @@ import astropy.units as u
 import numpy as np
 from lmfit import Parameters, minimize
 from scipy.interpolate import CubicSpline, interp1d
+
 from xrtpy.util.filters import validate_and_format_filters
 from xrtpy.xrt_dem_iterative import dem_plotting
 
@@ -460,10 +461,10 @@ class XRTDEMIterative:
                     "See: https://hesperia.gsfc.nasa.gov/ssw/hinode/xrt/idl/util/xrt_dem_iterative2.pro\n\n"
                 ),
                 category=UserWarning,
-                stacklevel=2, #1
+                stacklevel=2,  # 1
             )
-            
-        #JoyRemove - April 24,2026
+
+        # JoyRemove - April 24,2026
         # if not self._using_estimated_uncertainty:
         #     print(
         #         "\n"
@@ -549,7 +550,7 @@ class XRTDEMIterative:
         # This matches the IDL temperature grid exactly. self.logT & self.T.
         # inclusive logT grid (IDL-style regular grid)
         # Units = 'log K. Runs from minimum_bound_temperature to Max_T with bin-width = DT
-        # SELFNOTEJOY- Do we need to add units - current holds no units- it's wokring correctly - Should this on the Test as well?- I don't think it- it's noted in IDL but used with units
+        # SELFNOTEJOY- Do we need to add units - current holds no units- it's working correctly - Should this on the Test as well?- I don't think it- it's noted in IDL but used with units
 
         # np.linspace over np.arange - simple reproduces that reliably:endpoint included, exact number of bins, and no accumulating floating-point drift - Best match to IDL
         self.logT = np.linspace(
@@ -567,7 +568,7 @@ class XRTDEMIterative:
 
         self.dlnT = (
             np.log(10.0) * self.dlogT
-        )  # for IDL-style integral DEM(T) * R(T) * T dlnT - IDL “regular logT grid”
+        )  # for IDL-style integral DEM(T) * R(T) * T dlnT - IDL "regular logT grid"
 
     def _interpolate_responses_to_grid(self):
         """
@@ -648,7 +649,6 @@ class XRTDEMIterative:
                 "Response matrix not available. Call _interpolate_responses_to_grid() first."
             )
         return self._response_matrix
-
 
     # DEM INITIALIZATION AND SOLVER METHODS
 
@@ -762,7 +762,7 @@ class XRTDEMIterative:
 
         est_log_dem_on_grid = np.ones_like(self.logT)  # March2026
 
-        # Return the intial first guessed DEM
+        # Return the initial first guessed DEM
         # Store for later use by the solver
         self._initial_log_dem = est_log_dem_on_grid
 
@@ -799,7 +799,7 @@ class XRTDEMIterative:
         self.weights = np.where(self._observed_intensities != 0.0, 1.0, 0.0)
         self.abundances = np.ones(n_line, dtype=float)
 
-        # pm_matrix = R(T) * T * dlnT     (IDL line: emis * 10^t * alog(10^dt))
+        # pm_matrix = R(T) * T * dlnT     (IDL line: emis * 10^t * along(10^dt))
         # units - DN/s/pix/cm^5 * K * dLnT * DEM == DN/s/PIX
         T_linear = self.T.to_value(u.K)
 
@@ -840,7 +840,7 @@ class XRTDEMIterative:
             )
 
         return params
-    
+
     def _reconstruct_dem_from_knots(self, params):
         """
         Construct DEM(T) on self.logT using spline of log10(DEM) at knot positions.
@@ -924,9 +924,7 @@ class XRTDEMIterative:
         # 3. initial guess (log10 DEM_model on grid)
         init_log_dem = self._estimate_initial_dem()  # flat ~ 1.0 in IDL
         self._initial_log_dem = init_log_dem
-        self._iteration_chi2 = (
-            []
-        )  # reset chi2 history for this solve pass JOY March 2026
+        self._iteration_chi2 = []  # reset chi2 history for this solve pass JOY March 2026
 
         # 4. spline system using that initial guess
         self._prepare_spline_system()
@@ -1039,7 +1037,6 @@ class XRTDEMIterative:
             sigma_phys = self.intensity_uncertainties.to_value(u.DN / u.s)
 
             for ii in range(1, N + 1):
-
                 print(f"  - Monte Carlo run {ii}/{N}", end="\r", flush=True)
 
                 noise = rng.normal(loc=0.0, scale=sigma_phys, size=base_obs_phys.shape)

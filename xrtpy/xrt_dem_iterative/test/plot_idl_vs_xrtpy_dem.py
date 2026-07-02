@@ -38,14 +38,15 @@ from xrtpy.xrt_dem_iterative.utils_sav_io import (
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-MEAN_TOL  = 0.20
-MAX_TOL   = 0.50
+MEAN_TOL = 0.20
+MAX_TOL = 0.50
 DEM_FLOOR = 1e10
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _log10_safe(arr: np.ndarray, floor: float = 1e-99) -> np.ndarray:
     return np.log10(np.maximum(arr, floor))
@@ -68,6 +69,7 @@ def _bar_color(d: float) -> str:
 # Core: solve one case
 # ---------------------------------------------------------------------------
 
+
 def solve_case(case: SavCase) -> tuple[IDLResult, XRTDEMIterative]:
     print(f"  Loading IDL .sav: {case.sav_path.name}")
     idl = load_idl_sav(case.sav_path)
@@ -89,6 +91,7 @@ def solve_case(case: SavCase) -> tuple[IDLResult, XRTDEMIterative]:
 # Core: make the 3-panel comparison figure
 # ---------------------------------------------------------------------------
 
+
 def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.Figure:
 
     logT_idl = idl.logT
@@ -102,12 +105,12 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
     mask = _valid_mask(idl.dem, solver.dem)
     delta = log_dem_xrt - log_dem_idl
     mean_diff = float(np.mean(np.abs(delta[mask])))
-    max_diff  = float(np.max(np.abs(delta[mask])))
+    max_diff = float(np.max(np.abs(delta[mask])))
 
     log_ratio = np.log10(np.maximum(modeled / case.intensities_array, 1e-99))
 
     # Print summary to terminal
-    print(f"\n  {'─'*55}")
+    print(f"\n  {'─' * 55}")
     print(f"  Case:          {case.label}  ({case.observation_date})")
     print(f"  Filters:       {case.filters}")
     print(f"  XRTpy χ²:      {chisq:.2f}")
@@ -119,7 +122,7 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
     for f, lr in zip(case.filters, log_ratio):
         flag = "  ← !" if abs(lr) > 1.0 else ""
         print(f"    {f:<22} {lr:+.3f}{flag}")
-    print(f"  {'─'*55}")
+    print(f"  {'─' * 55}")
 
     # ── Build figure ─────────────────────────────────────────────────────
     fig = plt.figure(figsize=(11, 13))
@@ -136,13 +139,28 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
     # ── Panel 1: DEM curves ──────────────────────────────────────────────
     ax1 = fig.add_subplot(gs[0])
 
-    ax1.step(logT_idl, log_dem_idl, where="mid",
-             color="#BA7517", linewidth=2.2, label="IDL reference")
-    ax1.step(logT_xrt, log_dem_xrt, where="mid",
-             color="#185FA5", linewidth=2.0, linestyle="--", label="XRTpy")
+    ax1.step(
+        logT_idl,
+        log_dem_idl,
+        where="mid",
+        color="#BA7517",
+        linewidth=2.2,
+        label="IDL reference",
+    )
+    ax1.step(
+        logT_xrt,
+        log_dem_xrt,
+        where="mid",
+        color="#185FA5",
+        linewidth=2.0,
+        linestyle="--",
+        label="XRTpy",
+    )
 
     # Shade high-T region where secondary rise often lives
-    ax1.axvspan(7.3, 8.05, alpha=0.07, color="crimson", label="High-T region (>logT 7.3)")
+    ax1.axvspan(
+        7.3, 8.05, alpha=0.07, color="crimson", label="High-T region (>logT 7.3)"
+    )
 
     # Mark spline knot positions
     knot_logT = np.linspace(logT_xrt.min(), logT_xrt.max(), solver.n_spl)
@@ -169,7 +187,7 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
     y_top_idl = log_dem_idl.max()
     y_top_xrt = log_dem_xrt.max()
 
-    #Maybelater
+    # Maybelater
     # ax1.annotate(
     #     f"IDL\nlogT={pk_idl:.2f}",
     #     xy=(pk_idl, y_top_idl),
@@ -192,12 +210,24 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
     ax2.bar(logT_xrt, delta, width=0.09, color=bar_colors, alpha=0.85)
 
     ax2.axhline(0, color="black", linewidth=1.0, alpha=0.35)
-    ax2.axhline(+MEAN_TOL, color="#1D9E75", linewidth=1.0, linestyle="--",
-                label=f"±{MEAN_TOL} dex (mean tol.)", alpha=0.8)
+    ax2.axhline(
+        +MEAN_TOL,
+        color="#1D9E75",
+        linewidth=1.0,
+        linestyle="--",
+        label=f"±{MEAN_TOL} dex (mean tol.)",
+        alpha=0.8,
+    )
     ax2.axhline(-MEAN_TOL, color="#1D9E75", linewidth=1.0, linestyle="--", alpha=0.8)
-    ax2.axhline(+MAX_TOL,  color="#BA7517", linewidth=1.0, linestyle=":",
-                label=f"±{MAX_TOL} dex (max tol.)", alpha=0.8)
-    ax2.axhline(-MAX_TOL,  color="#BA7517", linewidth=1.0, linestyle=":", alpha=0.8)
+    ax2.axhline(
+        +MAX_TOL,
+        color="#BA7517",
+        linewidth=1.0,
+        linestyle=":",
+        label=f"±{MAX_TOL} dex (max tol.)",
+        alpha=0.8,
+    )
+    ax2.axhline(-MAX_TOL, color="#BA7517", linewidth=1.0, linestyle=":", alpha=0.8)
     ax2.fill_between([5.4, 8.1], -MEAN_TOL, MEAN_TOL, alpha=0.06, color="#1D9E75")
 
     ax2.set_xlabel("log₁₀ T  [K]")
@@ -217,10 +247,15 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
     x = np.arange(n_filters)
     w = 0.35
 
-    ax3.bar(x - w / 2, case.intensities_array, w,
-            label="Observed", color="#185FA5", alpha=0.85)
-    ax3.bar(x + w / 2, modeled, w,
-            label="XRTpy modeled", color="#85B7EB", alpha=0.85)
+    ax3.bar(
+        x - w / 2,
+        case.intensities_array,
+        w,
+        label="Observed",
+        color="#185FA5",
+        alpha=0.85,
+    )
+    ax3.bar(x + w / 2, modeled, w, label="XRTpy modeled", color="#85B7EB", alpha=0.85)
 
     for i, (obs, mod) in enumerate(zip(case.intensities_array, modeled)):
         lr = np.log10(max(mod / obs, 1e-99))
@@ -249,13 +284,17 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
     ax3.set_xlim(-0.6, n_filters - 0.4)
 
     ax3.text(
-        0.98, 0.97,
+        0.98,
+        0.97,
         f"XRTpy χ² = {chisq:.1f}",
         transform=ax3.transAxes,
-        ha="right", va="top",
-        fontsize=9, color="#E24B4A",
-        bbox=dict(boxstyle="round,pad=0.3", facecolor="white",
-                  edgecolor="#E24B4A", alpha=0.8),
+        ha="right",
+        va="top",
+        fontsize=9,
+        color="#E24B4A",
+        bbox=dict(
+            boxstyle="round,pad=0.3", facecolor="white", edgecolor="#E24B4A", alpha=0.8
+        ),
     )
 
     return fig
@@ -264,6 +303,7 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(
@@ -290,7 +330,7 @@ def main() -> None:
     cases: list[SavCase] = []
 
     if args.all:
-        data_dir = Path(__file__).parent / "data" / "validation"/ "base"
+        data_dir = Path(__file__).parent / "data" / "validation" / "base"
         cases = discover_cases(data_dir)
         if not cases:
             print(f"No xrt_IDL_dem_*.sav files found in {data_dir}")

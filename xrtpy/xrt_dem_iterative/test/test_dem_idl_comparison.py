@@ -66,7 +66,7 @@ def _valid_mask(dem_idl: np.ndarray, dem_xrt: np.ndarray) -> np.ndarray:
 # Case discovery
 # ---------------------------------------------------------------------------
 
-DATA_DIR = Path(__file__).parent / "data" / "validation" / "base" 
+DATA_DIR = Path(__file__).parent / "data" / "validation" / "base"
 
 
 def _collect_cases() -> list[SavCase]:
@@ -141,7 +141,9 @@ def test_mean_log10_dem_difference(solved):
     diff = np.abs(_log10_safe(xrtpy.dem[mask]) - _log10_safe(idl.dem[mask]))
     mean_diff = float(np.mean(diff))
 
-    print(f"\n  [{case.label}]  Mean |Δlog10(DEM)| = {mean_diff:.4f} dex  (tol={MEAN_DEX_TOL})")
+    print(
+        f"\n  [{case.label}]  Mean |Δlog10(DEM)| = {mean_diff:.4f} dex  (tol={MEAN_DEX_TOL})"
+    )
     assert mean_diff < MEAN_DEX_TOL, (
         f"[{case.label}] Mean Δ = {mean_diff:.3f} dex > {MEAN_DEX_TOL}"
     )
@@ -155,7 +157,9 @@ def test_max_log10_dem_difference(solved):
     diff = np.abs(_log10_safe(xrtpy.dem[mask]) - _log10_safe(idl.dem[mask]))
     max_diff = float(np.max(diff))
 
-    print(f"\n  [{case.label}]  Max |Δlog10(DEM)| = {max_diff:.4f} dex  (tol={MAX_DEX_TOL})")
+    print(
+        f"\n  [{case.label}]  Max |Δlog10(DEM)| = {max_diff:.4f} dex  (tol={MAX_DEX_TOL})"
+    )
     assert max_diff < MAX_DEX_TOL, (
         f"[{case.label}] Max Δ = {max_diff:.3f} dex > {MAX_DEX_TOL}"
     )
@@ -206,9 +210,7 @@ def test_modeled_intensities_order_of_magnitude(solved):
 def test_chisq_is_finite(solved):
     """Chi-square must be finite."""
     case, _, xrtpy = solved
-    assert np.isfinite(xrtpy.chisq), (
-        f"[{case.label}] χ² is not finite: {xrtpy.chisq}"
-    )
+    assert np.isfinite(xrtpy.chisq), f"[{case.label}] χ² is not finite: {xrtpy.chisq}"
 
 
 def test_chisq_is_reasonable(solved):
@@ -216,10 +218,10 @@ def test_chisq_is_reasonable(solved):
     case, _, xrtpy = solved
     n_dof = max(1, len(case.filters) - xrtpy.n_spl)
     reduced = xrtpy.chisq / n_dof
-    print(f"\n  [{case.label}]  χ²={xrtpy.chisq:.2f}  reduced χ²={reduced:.2f}  dof={n_dof}")
-    assert reduced < 10.0, (
-        f"[{case.label}] Reduced χ² = {reduced:.2f} > 10"
+    print(
+        f"\n  [{case.label}]  χ²={xrtpy.chisq:.2f}  reduced χ²={reduced:.2f}  dof={n_dof}"
     )
+    assert reduced < 10.0, f"[{case.label}] Reduced χ² = {reduced:.2f} > 10"
 
 
 def test_diagnostic_print_full_comparison(solved):
@@ -243,7 +245,7 @@ def test_diagnostic_print_full_comparison(solved):
     print(f"  Filters:  {case.filters}")
     print(f"{sep}")
     print(f"  {'logT':>6}  {'IDL':>10}  {'XRTpy':>10}  {'Δ(dex)':>9}  valid")
-    print(f"  {'-'*55}")
+    print(f"  {'-' * 55}")
     for i, lt in enumerate(idl.logT):
         d = delta[i] if mask[i] else float("nan")
         flag = " *" if mask[i] and abs(d) > MAX_DEX_TOL else "  "
@@ -251,122 +253,123 @@ def test_diagnostic_print_full_comparison(solved):
             f"  {lt:>6.2f}  {log_idl[i]:>10.3f}  {log_xrt[i]:>10.3f}  "
             f"{d:>+9.3f}  {'yes' if mask[i] else 'no '}{flag}"
         )
-    print(f"  {'-'*55}")
+    print(f"  {'-' * 55}")
     print(f"  Mean |Δ| = {mean_d:.4f} dex     Max |Δ| = {max_d:.4f} dex")
     print(f"  XRTpy χ² = {xrtpy.chisq:.2f}")
     print(f"  IDL   peak logT = {idl.logT[np.argmax(idl.dem)]:.2f}")
     print(f"  XRTpy peak logT = {xrtpy.logT[np.argmax(xrtpy.dem)]:.2f}")
     print()
     print(f"  {'Filter':<22} {'Observed':>10} {'Modeled':>10} {'log10(M/O)':>11}")
-    print(f"  {'-'*55}")
-    for f, obs, mod in zip(case.filters, case.intensities_array, xrtpy.modeled_intensities):
+    print(f"  {'-' * 55}")
+    for f, obs, mod in zip(
+        case.filters, case.intensities_array, xrtpy.modeled_intensities
+    ):
         lr = np.log10(max(mod / obs, 1e-99))
-        print(f"  {f:<22} {obs:>10.3f} {mod:>10.3f} {lr:>+11.3f}{'  ←!' if abs(lr) > 1.0 else ''}")
+        print(
+            f"  {f:<22} {obs:>10.3f} {mod:>10.3f} {lr:>+11.3f}{'  ←!' if abs(lr) > 1.0 else ''}"
+        )
     print(f"{sep}\n")
 
+    # """
+    # Scientific Validation: IDL xrt_dem_iterative2.pro vs XRTpy XRTDEMIterative
+    # ============================================================================
 
-# """
-# Scientific Validation: IDL xrt_dem_iterative2.pro vs XRTpy XRTDEMIterative
-# ============================================================================
+    # These tests compare the XRTpy DEM solver output against reference solutions
+    # produced by the IDL routine xrt_dem_iterative2.pro (SolarSoft).
 
-# These tests compare the XRTpy DEM solver output against reference solutions
-# produced by the IDL routine xrt_dem_iterative2.pro (SolarSoft).
+    # Because DEM inversion is ill-posed and the two implementations use different
+    # optimizers (IDL MPFIT vs Python lmfit) and spline libraries, exact bin-by-bin
+    # agreement is not expected. Instead, we verify:
 
-# Because DEM inversion is ill-posed and the two implementations use different
-# optimizers (IDL MPFIT vs Python lmfit) and spline libraries, exact bin-by-bin
-# agreement is not expected. Instead, we verify:
+    #     1. log10(DEM) mean absolute difference < tolerance (in dex)
+    #     2. log10(DEM) max absolute difference  < tolerance (in dex)
+    #     3. Peak temperature agreement within one logT bin (0.1 dex)
+    #     4. Modeled intensities agree with observed within chi-square tolerance
 
-#     1. log10(DEM) mean absolute difference < tolerance (in dex)
-#     2. log10(DEM) max absolute difference  < tolerance (in dex)
-#     3. Peak temperature agreement within one logT bin (0.1 dex)
-#     4. Modeled intensities agree with observed within chi-square tolerance
+    # Tolerances used (Standard tier):
+    #     mean |log10(DEM)| < 0.20 dex
+    #     max  |log10(DEM)| < 0.50 dex
+    #     peak logT difference < 0.15 (within ~1 bin)
+    # """
 
-# Tolerances used (Standard tier):
-#     mean |log10(DEM)| < 0.20 dex
-#     max  |log10(DEM)| < 0.50 dex
-#     peak logT difference < 0.15 (within ~1 bin)
-# """
+    # from pathlib import Path
 
-# from pathlib import Path
+    # import numpy as np
+    # import pytest
+    # from scipy.io import readsav
 
-# import numpy as np
-# import pytest
-# from scipy.io import readsav
+    # from xrtpy.response.tools import generate_temperature_responses
+    # from xrtpy.xrt_dem_iterative import XRTDEMIterative
 
-# from xrtpy.response.tools import generate_temperature_responses
-# from xrtpy.xrt_dem_iterative import XRTDEMIterative
+    # DATA_DIR = Path(__file__).parent / "data" / "validation"
 
+    # # Tolerance tier — Standard
+    # MEAN_DEX_TOL = 0.20   # mean |log10(DEM)| across valid bins
+    # MAX_DEX_TOL  = 0.50   # max  |log10(DEM)| across valid bins
+    # PEAK_LOGT_TOL = 0.15  # peak temperature agreement [log10 K]
 
-# DATA_DIR = Path(__file__).parent / "data" / "validation"
+    # # Mask threshold — ignore bins where both DEMs are essentially zero
+    # DEM_FLOOR = 1e10  # [cm^-5 K^-1]  below this both are noise
 
-# # Tolerance tier — Standard
-# MEAN_DEX_TOL = 0.20   # mean |log10(DEM)| across valid bins
-# MAX_DEX_TOL  = 0.50   # max  |log10(DEM)| across valid bins
-# PEAK_LOGT_TOL = 0.15  # peak temperature agreement [log10 K]
+    # def _log10_safe(dem, floor=1e-99):
+    #     """log10 with a floor to avoid -inf."""
+    #     return np.log10(np.maximum(dem, floor))
 
-# # Mask threshold — ignore bins where both DEMs are essentially zero
-# DEM_FLOOR = 1e10  # [cm^-5 K^-1]  below this both are noise
+    # def _valid_mask(dem_idl, dem_xrtpy, floor=DEM_FLOOR):
+    #     """
+    #     Boolean mask of bins where at least one DEM is above the floor.
+    #     Excludes essentially-zero tails from the comparison.
+    #     """
+    #     return (dem_idl > floor) | (dem_xrtpy > floor)
 
+    # def _load_idl_sav(sav_path):
+    #     """
+    #     Load IDL .sav file and return (logT, dem_base) as 1D float arrays.
+    #     """
+    #     data = readsav(str(sav_path), python_dict=True)
 
-# def _log10_safe(dem, floor=1e-99):
-#     """log10 with a floor to avoid -inf."""
-#     return np.log10(np.maximum(dem, floor))
+    #     # logT — try common key names
+    #     for key in ("logt", "logT", "logT_out", "logt_out"):
+    #         if key in data:
+    #             logT = np.array(data[key]).ravel().astype(float)
+    #             break
+    #     else:
+    #         raise KeyError(f"logT key not found. Available keys: {list(data.keys())}")
 
+    #     # dem — base DEM (1D or first column of 2D)
+    #     for key in ("dem", "dem_out", "dem0"):
+    #         if key in data:
+    #             dem = np.array(data[key])
+    #             if dem.ndim == 2:
+    #                 dem = dem[:, 0]   # first column = base
+    #             dem = dem.ravel().astype(float)
+    #             break
+    #     else:
+    #         raise KeyError(f"DEM key not found. Available keys: {list(data.keys())}")
 
-# def _valid_mask(dem_idl, dem_xrtpy, floor=DEM_FLOOR):
-#     """
-#     Boolean mask of bins where at least one DEM is above the floor.
-#     Excludes essentially-zero tails from the comparison.
-#     """
-#     return (dem_idl > floor) | (dem_xrtpy > floor)
+    #     return logT, dem
 
+    # # ---------------------------------------------------------------------------
+    # # Case 1: 2008-01-04  (5-filter, no MC)
+    # # ---------------------------------------------------------------------------
 
-# def _load_idl_sav(sav_path):
-#     """
-#     Load IDL .sav file and return (logT, dem_base) as 1D float arrays.
-#     """
-#     data = readsav(str(sav_path), python_dict=True)
+    # class TestIDLvsXRTpy_20080104:
 
-#     # logT — try common key names
-#     for key in ("logt", "logT", "logT_out", "logt_out"):
-#         if key in data:
-#             logT = np.array(data[key]).ravel().astype(float)
-#             break
-#     else:
-#         raise KeyError(f"logT key not found. Available keys: {list(data.keys())}")
-
-#     # dem — base DEM (1D or first column of 2D)
-#     for key in ("dem", "dem_out", "dem0"):
-#         if key in data:
-#             dem = np.array(data[key])
-#             if dem.ndim == 2:
-#                 dem = dem[:, 0]   # first column = base
-#             dem = dem.ravel().astype(float)
-#             break
-#     else:
-#         raise KeyError(f"DEM key not found. Available keys: {list(data.keys())}")
-
-#     return logT, dem
-
-
-# # ---------------------------------------------------------------------------
-# # Case 1: 2008-01-04  (5-filter, no MC)
-# # ---------------------------------------------------------------------------
-
-# class TestIDLvsXRTpy_20080104:
-
-
-#     SAV_FILE = DATA_DIR / "xrt_dem_output_20071213T0401_NOMC.sav"#"xrt_IDL_dem_output_20080104.sav"
+    #     SAV_FILE = DATA_DIR / "xrt_dem_output_20071213T0401_NOMC.sav"#"xrt_IDL_dem_output_20080104.sav"
 
     FILTERS = ["Be-med", "Al-mesh", "Ti-poly", "Al-poly", "Be-thin"]
-    INTENSITIES = np.array([
-        234.283365,  # Be-med
-        183.711876,  # Al-mesh
-        45.931438,  # Ti-poly
-        91.745329,  # Al-poly
-        5.755926,  # Be-thin
-        ], dtype=float)
+    INTENSITIES = np.array(
+        [
+            234.283365,  # Be-med
+            183.711876,  # Al-mesh
+            45.931438,  # Ti-poly
+            91.745329,  # Al-poly
+            5.755926,  # Be-thin
+        ],
+        dtype=float,
+    )
     OBSERVATION_DATE = "2008-01-04T11:04:26"
+
 
 #     FILTERS= ["be-med","Be-thin","Al-poly", "Al-poly/Ti-poly","Ti-poly","Al-thick"]
 #     INTENSITIES = [603.875886,150.921435,2412.340960, 301.354389 ,603.100596,2.519851]

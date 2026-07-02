@@ -40,12 +40,12 @@ dynamic = [ "version" ]
 dependencies = [
   "astropy>=6",
   "lmfit>=1.2.2",
+  "lmfit>=1.2.2",
   "matplotlib>=3.7",
   "numpy>=1.24",
   "scikit-image>=0.21",
   "scipy>=1.11.1",
   "sunpy[map]>=5.1",
-  "lmfit>=1.2.2",
 ]
 optional-dependencies.dev = [
   "nox>=2024.10.9",

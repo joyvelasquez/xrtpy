@@ -294,7 +294,7 @@ def test_solve_single_dem_returns_zeros_when_all_intensities_zero():
     # modeled intensities must be all zero
     assert np.all(modeled == 0.0)
 
-    # chi sqaure must be zero
+    # chi square must be zero
     assert chi2 == 0.0
 
     # result object must be None (no lmfit minimization)
@@ -505,7 +505,6 @@ def test_plot_dem_runs_without_error():
 def test_plot_dem_mc_runs_without_error():
     """Smoke test — plot_dem_mc() completes without raising, with and without MC."""
 
-
     filters = ["Al-poly", "Ti-poly", "Be-thin"]
     intensities = np.array([500.0, 1800.0, 820.0], dtype=float)
     responses = generate_temperature_responses(filters, "2012-10-27T00:00:00")
@@ -581,7 +580,7 @@ def test_user_provided_intensity_uncertainties_are_used():
 
 ########
 
-#NEW TEST 
+# NEW TEST
 
 
 def test_init_rejects_boolean_monte_carlo_runs():
@@ -594,7 +593,6 @@ def test_init_rejects_boolean_monte_carlo_runs():
 
     with pytest.raises(TypeError, match="non-negative whole number"):
         XRTDEMIterative(filters, intensities, responses, monte_carlo_runs=True)
-
 
 
 def test_init_rejects_negative_monte_carlo_runs():
@@ -679,7 +677,9 @@ def test_init_rejects_inverted_temperature_bounds():
 
     with pytest.raises(ValueError, match="minimum_bound_temperature must be <"):
         XRTDEMIterative(
-            filters, intensities, responses,
+            filters,
+            intensities,
+            responses,
             minimum_bound_temperature=8.0,
             maximum_bound_temperature=5.5,
         )
@@ -695,7 +695,9 @@ def test_init_rejects_equal_temperature_bounds():
 
     with pytest.raises(ValueError, match="minimum_bound_temperature must be <"):
         XRTDEMIterative(
-            filters, intensities, responses,
+            filters,
+            intensities,
+            responses,
             minimum_bound_temperature=6.0,
             maximum_bound_temperature=6.0,
         )
@@ -709,9 +711,13 @@ def test_init_rejects_non_positive_step_size():
     intensities = np.array([500.0, 800.0])
     responses = generate_temperature_responses(filters, "2012-10-27T00:00:00")
 
-    with pytest.raises(ValueError, match="logarithmic_temperature_step_size must be a positive"):
+    with pytest.raises(
+        ValueError, match="logarithmic_temperature_step_size must be a positive"
+    ):
         XRTDEMIterative(
-            filters, intensities, responses,
+            filters,
+            intensities,
+            responses,
             logarithmic_temperature_step_size=0.0,
         )
 
@@ -726,8 +732,10 @@ def test_init_rejects_temperature_range_outside_response():
 
     with pytest.raises(ValueError, match="outside the bounds"):
         XRTDEMIterative(
-            filters, intensities, responses,
-            minimum_bound_temperature=3.0,   # below any realistic response
+            filters,
+            intensities,
+            responses,
+            minimum_bound_temperature=3.0,  # below any realistic response
             maximum_bound_temperature=10.0,  # above any realistic response
         )
 
@@ -780,8 +788,8 @@ def test_init_rejects_empty_observed_channel():
         XRTDEMIterative([], intensities, responses)
 
 
-
 # PROPERTY TESTS
+
 
 def test_observed_intensities_property_returns_quantity_with_correct_units():
     """observed_intensities property must return an astropy Quantity in DN/s.
@@ -825,6 +833,7 @@ def test_min_observational_uncertainty_property_is_two_DN_per_s():
     assert x.min_observational_uncertainty.value == pytest.approx(2.0)
     assert x.min_observational_uncertainty.unit == u.DN / u.s
 
+
 def test_relative_uncertainty_property_is_three_percent():
     """relative_uncertainty must be exactly 0.03 (3%).
     Expected: float 0.03.
@@ -838,13 +847,16 @@ def test_relative_uncertainty_property_is_three_percent():
     assert x.relative_uncertainty == pytest.approx(0.03)
 
 
-@pytest.mark.parametrize("intensity,expected_sigma", [
-    (1.0,    2.0),   # 3% of 1.0 = 0.03 < 2.0 → floor at 2.0
-    (50.0,   2.0),   # 3% of 50 = 1.5 < 2.0 → floor at 2.0
-    (100.0,  3.0),   # 3% of 100 = 3.0 > 2.0 → use 3.0
-    (500.0,  15.0),  # 3% of 500 = 15.0
-    (2000.0, 60.0),  # 3% of 2000 = 60.0
-])
+@pytest.mark.parametrize(
+    "intensity,expected_sigma",
+    [
+        (1.0, 2.0),  # 3% of 1.0 = 0.03 < 2.0 → floor at 2.0
+        (50.0, 2.0),  # 3% of 50 = 1.5 < 2.0 → floor at 2.0
+        (100.0, 3.0),  # 3% of 100 = 3.0 > 2.0 → use 3.0
+        (500.0, 15.0),  # 3% of 500 = 15.0
+        (2000.0, 60.0),  # 3% of 2000 = 60.0
+    ],
+)
 def test_default_intensity_uncertainties_apply_correct_model(intensity, expected_sigma):
     """Default uncertainty model: sigma = max(0.03 * I, 2 DN/s).
     Expected: computed sigma matches the formula at each intensity.
@@ -856,12 +868,13 @@ def test_default_intensity_uncertainties_apply_correct_model(intensity, expected
     x = XRTDEMIterative(filters, intensities, responses)
 
     import warnings
+
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)
         sigma = x.intensity_uncertainties.to_value(u.DN / u.s)
 
     assert sigma[0] == pytest.approx(expected_sigma, rel=1e-6)
-    
+
 
 def test_default_intensity_uncertainties_triggers_userwarning():
     """Accessing intensity_uncertainties without providing them must emit a UserWarning.
@@ -875,7 +888,8 @@ def test_default_intensity_uncertainties_triggers_userwarning():
 
     with pytest.warns(UserWarning, match="No intensity_uncertainties provided"):
         _ = x.intensity_uncertainties
-        
+
+
 def test_normalization_factor_property_returns_stored_value():
     """normalization_factor property must return the value passed to __init__.
     Expected: float equal to the custom value 1e20.
@@ -915,8 +929,8 @@ def test_max_iterations_property_returns_stored_value():
     assert x.max_iterations == 500
 
 
+# validate_inputs additional coverage
 
-#validate_inputs additional coverage
 
 def test_validate_inputs_warns_when_all_intensities_zero():
     """All-zero intensities must emit a UserWarning (not raise).
@@ -931,19 +945,21 @@ def test_validate_inputs_warns_when_all_intensities_zero():
     with pytest.warns(UserWarning, match="[Zz]ero"):
         x.validate_inputs()
 
+
 def test_validate_inputs_rejects_negative_intensity_uncertainties():
     """intensity_uncertainties with a negative value must raise ValueError in validate_inputs.
     Expected: ValueError about finite and >= 0.
     """
     filters = ["Al-poly", "Ti-poly"]
     intensities = np.array([500.0, 800.0])
-    errors = np.array([-10.0, 20.0])   # one negative
+    errors = np.array([-10.0, 20.0])  # one negative
     responses = generate_temperature_responses(filters, "2012-10-27T00:00:00")
 
     x = XRTDEMIterative(filters, intensities, responses, intensity_uncertainties=errors)
 
     with pytest.raises(ValueError, match="finite and >= 0"):
         x.validate_inputs()
+
 
 def test_validate_inputs_rejects_nan_intensity_uncertainties():
     """intensity_uncertainties containing NaN must raise ValueError in validate_inputs.
@@ -958,7 +974,8 @@ def test_validate_inputs_rejects_nan_intensity_uncertainties():
 
     with pytest.raises(ValueError, match="finite and >= 0"):
         x.validate_inputs()
-        
+
+
 def test_validate_inputs_raises_when_temperature_grid_too_small():
     """A temperature range that produces fewer than 4 bins must raise ValueError.
     E.g. [6.0, 6.2] with step=0.1 → only 3 bins.
@@ -970,31 +987,45 @@ def test_validate_inputs_raises_when_temperature_grid_too_small():
 
     with pytest.raises(ValueError, match="at least 4 points"):
         XRTDEMIterative(
-            filters, intensities, responses,
+            filters,
+            intensities,
+            responses,
             minimum_bound_temperature=6.0,
             maximum_bound_temperature=6.2,
-            logarithmic_temperature_step_size=0.1,   # → 3 bins only
+            logarithmic_temperature_step_size=0.1,  # → 3 bins only
         )
-
 
 
 # n_spl FORMULA FOR DIFFERENT FILTER COUNTS
 
-@pytest.mark.parametrize("n_filters,expected_n_spl", [
-    (2, 1),   # min(max(2-1,1),7) = 1
-    (3, 2),   # min(max(3-1,1),7) = 2
-    (5, 4),   # min(max(5-1,1),7) = 4
-    (8, 7),   # min(max(8-1,1),7) = 7  (capped at 7)
-    (10, 7),  # min(max(10-1,1),7) = 7 (still capped)
-])
 
+@pytest.mark.parametrize(
+    "n_filters,expected_n_spl",
+    [
+        (2, 1),  # min(max(2-1,1),7) = 1
+        (3, 2),  # min(max(3-1,1),7) = 2
+        (5, 4),  # min(max(5-1,1),7) = 4
+        (8, 7),  # min(max(8-1,1),7) = 7  (capped at 7)
+        (10, 7),  # min(max(10-1,1),7) = 7 (still capped)
+    ],
+)
 def test_n_spl_formula_for_various_filter_counts(n_filters, expected_n_spl):
     """n_spl = min(max(n_filters - 1, 1), 7) — IDL convention.
     Expected: exact integer n_spl for each filter count.
     """
     # Build the required number of filters/intensities/responses
-    available = ["Al-poly", "Ti-poly", "Be-thin", "C-poly", "Be-med",
-                 "Al-med", "Al-mesh", "Al-thick", "Be-thick", "Al-poly/Ti-poly"]
+    available = [
+        "Al-poly",
+        "Ti-poly",
+        "Be-thin",
+        "C-poly",
+        "Be-med",
+        "Al-med",
+        "Al-mesh",
+        "Al-thick",
+        "Be-thick",
+        "Al-poly/Ti-poly",
+    ]
     filters = available[:n_filters]
     intensities = np.full(n_filters, 300.0)
     responses = generate_temperature_responses(filters, "2015-06-01T00:00:00")
@@ -1009,6 +1040,7 @@ def test_n_spl_formula_for_various_filter_counts(n_filters, expected_n_spl):
 
 
 # _build_lmfit_parameters
+
 
 def test_build_lmfit_parameters_count_bounds_and_initial_values():
     """_build_lmfit_parameters must produce exactly n_spl parameters,
@@ -1036,9 +1068,10 @@ def test_build_lmfit_parameters_count_bounds_and_initial_values():
         p = params[f"knot_{i}"]
         assert p.min == pytest.approx(-20.0)
         assert p.value == pytest.approx(x.spline_log_dem[i])
- 
+
 
 # solve() ROW-0 CONTRACT
+
 
 def test_solve_mc_row_zero_matches_base_solution():
     """After solve(), mc_dem[0], mc_base_obs[0], mc_mod_obs[0], mc_chisq[0]
@@ -1050,7 +1083,9 @@ def test_solve_mc_row_zero_matches_base_solution():
     responses = generate_temperature_responses(filters, "2019-05-10T00:00:00")
 
     x = XRTDEMIterative(
-        filters, intensities, responses,
+        filters,
+        intensities,
+        responses,
         monte_carlo_runs=3,
     )
     x.solve()
@@ -1081,6 +1116,7 @@ def test_solve_mc_row_zero_contract_with_n_equals_zero():
 
 # __repr__
 
+
 def test_repr_contains_key_fields():
     """__repr__ must include filter names, the logT range, and the step size.
     Expected: repr string containing 'Al-poly', '5.5', '8.0', '0.10'.
@@ -1099,6 +1135,7 @@ def test_repr_contains_key_fields():
 
 
 # SINGLE-FILTER EDGE CASE
+
 
 def test_solve_with_single_filter_completes_without_error():
     """solve() with only one filter channel must run without raising.

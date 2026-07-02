@@ -8,7 +8,7 @@ Example:
     xrt_IDL_dem_20071213T0401_Bemed603.875886_Bethin150.921435_Alpoly2412.34_.sav
 
 Compact filter name → XRTpy filter name mapping is handled automatically.
-Will be updated once I start testing with MC. 
+Will be updated once I start testing with MC.
 """
 
 from __future__ import annotations
@@ -25,25 +25,24 @@ from scipy.io import readsav
 # (e.g. "AlpolyTipoly" must be matched before "Alpoly")
 
 _FILTER_MAP: dict[str, str] = {
-    "AlpolyAlmesh":  "Al-poly/Al-mesh",
-    "AlpolyTipoly":  "Al-poly/Ti-poly",
+    "AlpolyAlmesh": "Al-poly/Al-mesh",
+    "AlpolyTipoly": "Al-poly/Ti-poly",
     "AlpolyAlthick": "Al-poly/Al-thick",
     "AlpolyBethick": "Al-poly/Be-thick",
-    "CpolyTipoly":   "C-poly/Ti-poly",
-    "Bemed":         "Be-med",
-    "Bethin":        "Be-thin",
-    "Bethick":       "Be-thick",
-    "Alpoly":        "Al-poly",
-    "Tipoly":        "Ti-poly",
-    "Almesh":        "Al-mesh",
-    "Almed":         "Al-med",
-    "Althick":       "Al-thick",
-    "Cpoly":         "C-poly",
+    "CpolyTipoly": "C-poly/Ti-poly",
+    "Bemed": "Be-med",
+    "Bethin": "Be-thin",
+    "Bethick": "Be-thick",
+    "Alpoly": "Al-poly",
+    "Tipoly": "Ti-poly",
+    "Almesh": "Al-mesh",
+    "Almed": "Al-med",
+    "Althick": "Al-thick",
+    "Cpoly": "C-poly",
 }
 
 # Pre-sorted (longest first) for unambiguous prefix matching
 _FILTER_KEYS_SORTED = sorted(_FILTER_MAP, key=len, reverse=True)
-
 
 
 # Data classes
@@ -65,6 +64,7 @@ class SavCase:
     label : str
         Short human-readable label derived from the filename.
     """
+
     sav_path: Path
     observation_date: str
     filters: list[str]
@@ -79,8 +79,9 @@ class SavCase:
 @dataclass(frozen=True)
 class IDLResult:
     """Loaded IDL DEM solution."""
-    logT: np.ndarray   # (nT,) log10 K
-    dem:  np.ndarray   # (nT,) cm^-5 K^-1
+
+    logT: np.ndarray  # (nT,) log10 K
+    dem: np.ndarray  # (nT,) cm^-5 K^-1
 
 
 # Filename parser
@@ -91,7 +92,7 @@ def _parse_filter_token(token: str) -> tuple[str, float] | tuple[None, None]:
     """
     for key in _FILTER_KEYS_SORTED:
         if token.startswith(key):
-            remainder = token[len(key):]
+            remainder = token[len(key) :]
             try:
                 return _FILTER_MAP[key], float(remainder)
             except ValueError:
@@ -133,10 +134,7 @@ def parse_sav_filename(sav_path: str | Path) -> SavCase:
     date_token = parts[0]
     m = re.match(r"(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})", date_token)
     if m:
-        obs_date = (
-            f"{m.group(1)}-{m.group(2)}-{m.group(3)}"
-            f"T{m.group(4)}:{m.group(5)}"
-        )
+        obs_date = f"{m.group(1)}-{m.group(2)}-{m.group(3)}T{m.group(4)}:{m.group(5)}"
     else:
         obs_date = date_token  # fall back to raw string
 
@@ -166,7 +164,7 @@ def parse_sav_filename(sav_path: str | Path) -> SavCase:
     )
 
 
-# SAV loade
+# SAV load
 def load_idl_sav(sav_path: str | Path) -> IDLResult:
     """
     Load an IDL DEM .sav file and return ``(logT, dem_base)`` as 1-D arrays.
@@ -202,7 +200,7 @@ def load_idl_sav(sav_path: str | Path) -> IDLResult:
         if key in data:
             arr = np.array(data[key])
             if arr.ndim == 2:
-                arr = arr[:, 0]   # first column = base DEM
+                arr = arr[:, 0]  # first column = base DEM
             dem = arr.ravel().astype(float)
             break
     if dem is None:

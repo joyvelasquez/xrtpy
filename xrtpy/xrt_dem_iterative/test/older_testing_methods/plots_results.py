@@ -9,7 +9,7 @@ from utils_case_io import (
     run_dem_for_mc_csv,
 )
 
-#NOTE-User will need Python 3.11 to run
+# NOTE-User will need Python 3.11 to run
 
 # CASE_DIR = case_dir("case_20210720_1604")
 # csv_path = CASE_DIR / "mc_intensities_20210720_1604_IDL.csv"
@@ -30,14 +30,13 @@ print(mc.mc_intensities.shape)  # (N, n_filters)
 print(mc.df.head())
 
 
-
 out = run_dem_for_mc_csv(
     csv_path=csv_path,
     observation_date=observation_date,
     intensity_errors=None,  # keep None to match IDL default behavior
 )
 
-#import pdb; pdb.set_trace()
+# import pdb; pdb.set_trace()
 
 print("filters:", out.filters)
 print("logT shape:", out.logT.shape)
@@ -45,7 +44,7 @@ print("dem_runs shape:", out.dem_runs.shape)
 print("modeled_runs shape:", out.modeled_runs.shape)
 print("chisq_runs shape:", out.chisq_runs.shape)
 
-#import pdb; pdb.set_trace()
+# import pdb; pdb.set_trace()
 
 print("\n\n-New Section-\n")
 print("IDL logT:", idl.logT.shape)
@@ -166,9 +165,9 @@ print("IDL dem_runs:", idl.dem_runs.shape, "n_runs=", idl.n_runs)
 # print(f"Movie saved to: {movie_path}")
 
 
-
 def _log10_dem(dem: np.ndarray, floor: float = 1e-99) -> np.ndarray:
     return np.log10(np.maximum(dem, floor))
+
 
 # -------------------------
 # Choose runs to plot
@@ -185,10 +184,10 @@ logT = out.logT
 
 # Extract selected runs from each side
 idl_sel = np.stack([idl.dem_runs[r - 1] for r in runs_to_plot], axis=0)  # (n, 26)
-py_sel  = np.stack([out.dem_runs[r - 1] for r in runs_to_plot], axis=0)  # (n, 26)
+py_sel = np.stack([out.dem_runs[r - 1] for r in runs_to_plot], axis=0)  # (n, 26)
 
 log_idl_10 = _log10_dem(idl_sel)
-log_py_10  = _log10_dem(py_sel)
+log_py_10 = _log10_dem(py_sel)
 
 # Global y-limits across all selected overlays (same scale)
 ymin = float(min(log_idl_10.min(), log_py_10.min()))
@@ -207,7 +206,7 @@ for k, run in enumerate(runs_to_plot):
     fig, ax = plt.subplots(figsize=(8, 5))
 
     ax.plot(logT, log_idl_10[k], label=f"IDL run {run}", linewidth=2)
-    ax.plot(logT, log_py_10[k],  label=f"XRTpy run {run}", linewidth=2, linestyle="--")
+    ax.plot(logT, log_py_10[k], label=f"XRTpy run {run}", linewidth=2, linestyle="--")
 
     ax.set_title(f"DEM Overlay (Run {run})")
     ax.set_xlabel("log T (K)")
@@ -233,7 +232,7 @@ print(f"Saved {len(runs_to_plot)} overlay plots to: {plots_dir}")
 fig, ax = plt.subplots(figsize=(8, 5))
 
 (line_idl,) = ax.plot([], [], linewidth=2, label="IDL")
-(line_py,)  = ax.plot([], [], linewidth=2, linestyle="--", label="XRTpy")
+(line_py,) = ax.plot([], [], linewidth=2, linestyle="--", label="XRTpy")
 
 ax.set_xlim(float(logT.min()), float(logT.max()))
 ax.set_ylim(ymin, ymax)
@@ -242,12 +241,14 @@ ax.set_ylabel("log10(DEM)")
 ax.grid(True, alpha=0.3)
 ax.legend()
 
+
 def update(frame: int):
     run = runs_to_plot[frame]
     ax.set_title(f"DEM Overlay (Run {run})")
     line_idl.set_data(logT, log_idl_10[frame])
-    line_py.set_data(logT,  log_py_10[frame])
+    line_py.set_data(logT, log_py_10[frame])
     return (line_idl, line_py)
+
 
 ani = animation.FuncAnimation(
     fig,
@@ -285,6 +286,7 @@ import numpy as np
 def _log10_dem(dem: np.ndarray, floor: float = 1e-99) -> np.ndarray:
     return np.log10(np.maximum(dem, floor))
 
+
 # runs_to_plot should be 1-based run numbers, e.g.:
 # runs_to_plot = list(range(1, 11))   # first 10
 # runs_to_plot = list(range(1, 101))  # all 100
@@ -306,9 +308,9 @@ major_x = logT[major_idx]  # actual grid values used
 # -------------------------
 # Δ(log10 DEM) across ALL selected runs
 # -------------------------
-delta_all = log_py_10 - log_idl_10                     # (n_runs_selected, 26)
-sigma_delta = np.std(delta_all, axis=0)                # (26,)
-sigma_major = sigma_delta[major_idx]                   # (n_major,)
+delta_all = log_py_10 - log_idl_10  # (n_runs_selected, 26)
+sigma_delta = np.std(delta_all, axis=0)  # (26,)
+sigma_major = sigma_delta[major_idx]  # (n_major,)
 
 # y-limits for bottom panel based on all runs at major points (stable scaling)
 dmin = float(np.min(delta_all[:, major_idx]))
@@ -318,7 +320,7 @@ dmin -= dpad
 dmax += dpad
 
 # Optional "agreement band" shading (dex). Set to None to disable.
-delta_band = None          # e.g. 0.10 for ±0.10 dex band, or None to disable
+delta_band = None  # e.g. 0.10 for ±0.10 dex band, or None to disable
 
 # -------------------------
 # SECTION 1: Save professional PNGs (2 panels)
@@ -331,7 +333,8 @@ for k, run in enumerate(runs_to_plot):
     chisq = float(out.chisq_runs[run - 1]) if hasattr(out, "chisq_runs") else np.nan
 
     fig, (ax1, ax2) = plt.subplots(
-        2, 1,
+        2,
+        1,
         figsize=(8.5, 7.0),
         sharex=True,
         gridspec_kw={"height_ratios": [3, 1]},
@@ -340,7 +343,7 @@ for k, run in enumerate(runs_to_plot):
 
     # ---- Top: DEM overlay ----
     ax1.plot(logT, log_idl_10[k], linewidth=2.2, label="IDL")
-    ax1.plot(logT, log_py_10[k],  linewidth=2.2, linestyle="--", label="XRTpy")
+    ax1.plot(logT, log_py_10[k], linewidth=2.2, linestyle="--", label="XRTpy")
     ax1.set_ylabel("log10(DEM)")
     ax1.set_ylim(ymin, ymax)
     ax1.grid(True, alpha=0.25)
@@ -348,10 +351,12 @@ for k, run in enumerate(runs_to_plot):
 
     # Annotate run + chisq
     ax1.text(
-        0.02, 0.95,
+        0.02,
+        0.95,
         f"Run: {run}\n$\\chi^2$: {chisq:.3g}",
         transform=ax1.transAxes,
-        va="top", ha="left",
+        va="top",
+        ha="left",
         bbox={"boxstyle": "round", "alpha": 0.15},
     )
 
@@ -456,6 +461,7 @@ from matplotlib.collections import LineCollection
 def _log10_dem(dem: np.ndarray, floor: float = 1e-99) -> np.ndarray:
     return np.log10(np.maximum(dem, floor))
 
+
 # -------------------------
 # Inputs assumed to exist:
 #   logT (nT,)
@@ -468,15 +474,17 @@ def _log10_dem(dem: np.ndarray, floor: float = 1e-99) -> np.ndarray:
 
 # Major points: only keep ones inside the grid
 major_logT = np.arange(5.0, 8.0 + 1e-9, 0.5)
-major_logT = major_logT[(major_logT >= logT.min() - 1e-9) & (major_logT <= logT.max() + 1e-9)]
+major_logT = major_logT[
+    (major_logT >= logT.min() - 1e-9) & (major_logT <= logT.max() + 1e-9)
+]
 
 major_idx = np.array([int(np.argmin(np.abs(logT - t))) for t in major_logT])
 major_x = logT[major_idx]
 
 # Delta across frames
-delta_all = log_py_10 - log_idl_10                  # (n_frames, nT)
-sigma_delta = np.std(delta_all, axis=0)             # (nT,)
-sigma_major = sigma_delta[major_idx]                # (n_major,)
+delta_all = log_py_10 - log_idl_10  # (n_frames, nT)
+sigma_delta = np.std(delta_all, axis=0)  # (nT,)
+sigma_major = sigma_delta[major_idx]  # (n_major,)
 
 # Stable y-range for bottom panel
 dmin = float(np.min(delta_all[:, major_idx]))
@@ -495,7 +503,7 @@ ax_bot = fig.add_subplot(gs[1, 0], sharex=ax_top)
 
 # Top lines
 (line_idl,) = ax_top.plot([], [], linewidth=2, label="IDL")
-(line_py,)  = ax_top.plot([], [], linewidth=2, linestyle="--", label="XRTpy")
+(line_py,) = ax_top.plot([], [], linewidth=2, linestyle="--", label="XRTpy")
 
 ax_top.set_xlim(float(logT.min()), float(logT.max()))
 ax_top.set_ylim(ymin, ymax)
@@ -516,7 +524,10 @@ plt.setp(ax_top.get_xticklabels(), visible=False)
 # Build animated "errorbar" artists manually
 # -------------------------
 # Markers
-(points_line,) = ax_bot.plot(major_x, np.zeros_like(major_x), "o", markersize=5, color="black")
+(points_line,) = ax_bot.plot(
+    major_x, np.zeros_like(major_x), "o", markersize=5, color="black"
+)
+
 
 # Vertical error segments (LineCollection)
 def make_vsegments(y_major):
@@ -530,8 +541,11 @@ def make_vsegments(y_major):
     segs[:, 1, 1] = yhi
     return segs
 
+
 # Caps (small horizontal lines at top/bottom)
 cap_halfwidth = 0.03  # in logT units (adjust if you want)
+
+
 def make_capsegs(y_major):
     ylo = y_major - sigma_major
     yhi = y_major + sigma_major
@@ -542,10 +556,16 @@ def make_capsegs(y_major):
         segs.append([[x - cap_halfwidth, yh], [x + cap_halfwidth, yh]])
     return np.array(segs, dtype=float)
 
-vlines = LineCollection(make_vsegments(np.zeros_like(major_x)), colors="black", linewidths=1.0)
-caps   = LineCollection(make_capsegs(np.zeros_like(major_x)), colors="black", linewidths=1.0)
+
+vlines = LineCollection(
+    make_vsegments(np.zeros_like(major_x)), colors="black", linewidths=1.0
+)
+caps = LineCollection(
+    make_capsegs(np.zeros_like(major_x)), colors="black", linewidths=1.0
+)
 ax_bot.add_collection(vlines)
 ax_bot.add_collection(caps)
+
 
 # -------------------------
 # Update function
@@ -556,7 +576,7 @@ def update(frame: int):
     # Top
     ax_top.set_title(f"DEM Overlay (Run {run})")
     line_idl.set_data(logT, log_idl_10[frame])
-    line_py.set_data(logT,  log_py_10[frame])
+    line_py.set_data(logT, log_py_10[frame])
 
     # Bottom
     y_major = delta_all[frame, major_idx]
@@ -567,6 +587,7 @@ def update(frame: int):
 
     return (line_idl, line_py, points_line, vlines, caps)
 
+
 ani = animation.FuncAnimation(
     fig,
     update,
@@ -576,7 +597,7 @@ ani = animation.FuncAnimation(
 
 movie_path = plots_dir / "dem_overlay_with_diff.mp4"
 writer = animation.FFMpegWriter(
-    fps=7.5,          # increase -> faster
+    fps=7.5,  # increase -> faster
     metadata={"artist": "xrtpy"},
     bitrate=1800,
 )
@@ -706,6 +727,7 @@ import numpy as np
 def _log10_dem(dem: np.ndarray, floor: float = 1e-99) -> np.ndarray:
     return np.log10(np.maximum(dem, floor))
 
+
 logT = out.logT
 dem_runs = out.dem_runs  # (100, 26)
 
@@ -744,6 +766,7 @@ import numpy as np
 def _log10_dem(dem: np.ndarray, floor: float = 1e-99) -> np.ndarray:
     return np.log10(np.maximum(dem, floor))
 
+
 logT = idl.logT
 dem_runs = idl.dem_runs  # (100, 26)
 
@@ -775,12 +798,13 @@ import numpy as np
 def _log10_dem(dem: np.ndarray, floor: float = 1e-99) -> np.ndarray:
     return np.log10(np.maximum(dem, floor))
 
+
 # Ensure grids match
 assert np.allclose(idl.logT, out.logT, atol=1e-8), "logT grids differ!"
 logT = idl.logT
 
-log_idl = _log10_dem(idl.dem_runs)      # (100, 26)
-log_xrt = _log10_dem(out.dem_runs)     # (100, 26)
+log_idl = _log10_dem(idl.dem_runs)  # (100, 26)
+log_xrt = _log10_dem(out.dem_runs)  # (100, 26)
 
 fig, ax = plt.subplots(figsize=(9, 6))
 
@@ -797,7 +821,7 @@ ax.set_xlabel("log T (K)")
 ax.set_ylabel("log10(DEM)")
 ax.grid(True, alpha=0.3)
 
-# Create manual legend entries (so we don’t get 200 legend lines)
+# Create manual legend entries (so we don't get 200 legend lines)
 from matplotlib.lines import Line2D
 
 legend_lines = [
@@ -838,13 +862,13 @@ for i in range(3):
     print(f"  row {i}: " + ", ".join([f"{v:.3f}" for v in row]))
 
 
-
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 def _log10_dem(dem: np.ndarray, floor: float = 1e-99) -> np.ndarray:
     return np.log10(np.maximum(dem, floor))
+
 
 # Ensure temperature grids match
 assert np.allclose(idl.logT, out.logT, atol=1e-8), "logT grids differ!"
@@ -870,8 +894,14 @@ log_xrt_initial = _log10_dem(xrt_initial)
 fig, ax = plt.subplots(figsize=(8.5, 6))
 
 ax.plot(logT, log_idl_initial, color="orange", linewidth=2.5, label="IDL (initial)")
-ax.plot(logT, log_xrt_initial, color="blue", linewidth=2.5, linestyle="--",
-        label="XRTpy (initial)")
+ax.plot(
+    logT,
+    log_xrt_initial,
+    color="blue",
+    linewidth=2.5,
+    linestyle="--",
+    label="XRTpy (initial)",
+)
 
 ax.set_title("Initial DEM Comparison: IDL vs XRTpy")
 ax.set_xlabel("log T (K)")
