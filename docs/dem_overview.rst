@@ -36,7 +36,7 @@ The core solver is implemented in :class:`xrtpy.xrt_dem_iterative.XRTDEMIterativ
 Conceptually, the solver:
     1. Builds a regular grid in :math:`\log_{10}(T)` between user-specified bounds.
     2. Interpolates the filter temperature responses onto that grid.
-    3. Represents log10(DEM) as a spline in log10(T).
+    3. Represents :math:`\log_{10}(DEM)` as a spline in :math:`\log_{10}(T)`.
     4. Uses least-squares fitting (via ``lmfit``) to adjust the spline values so that the modeled filter intensities best match the observed intensities.
     5. Optionally performs Monte Carlo runs by perturbing the observed intensities with their uncertainties and re-solving the DEM many times to estimate uncertainties.
 
