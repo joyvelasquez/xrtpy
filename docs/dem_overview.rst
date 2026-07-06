@@ -58,7 +58,7 @@ The DEM workflow requires three main input pieces:
 The DEM class requires temperature response functions for each filter, which
 describe the instrument sensitivity as a function of temperature. These
 responses can be generated for a chosen observation date using utilities
-provided in ``xrtpy.response.tools``.
+provided in `xrtpy.response.tools`.
 
 * Units: DN s\ :sup:`-1` pix\ :sup:`-1` cm\ :sup:`5`
 * Description: Instrument response as a function of temperature for each filter, matching the order of the filters.
@@ -189,7 +189,7 @@ SolarSoft/IDL routine `xrt_dem_iterative2.pro <https://hesperia.gsfc.nasa.gov/ss
 Small numerical differences between the Python and IDL implementations can arise due to:
 
 * Different interpolation choices (for example, cubic splines from SciPy).
-* Differences in optimization libraries (lmfit versus IDL MPFIT).
+* Differences in optimization libraries (`lmfit <https://lmfit.github.io/lmfit-py/>`__ versus IDL `MPFIT <https://www.nv5geospatialsoftware.com/docs/mpfit.html>`__).
 * Floating-point rounding and platform-specific details.
 
 Within these limits, the Python implementation is intended to produce
@@ -202,9 +202,10 @@ This section provides a short description of the equations solved by the
 XRTpy DEM solver. It is intended for orientation rather than as a full
 mathematical derivation.
 
-The DEM inversion problem is mathematically ill posed, meaning that multiple
-thermal distributions can reproduce the same set of observations. For each
-filter channel :math:`i`, the observed intensity :math:`I_i` is related to the
+The DEM inversion problem is underdetermined — there are more temperature
+bins than observed channels — meaning that multiple thermal distributions
+can reproduce the same set of observations. For each filter channel :math:`i`, the 
+observed intensity :math:`I_i` is related to the
 DEM by
 
 .. math::
