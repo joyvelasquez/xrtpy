@@ -34,7 +34,7 @@ originally available in IDL as `xrt_dem_iterative2.pro <https://hesperia.gsfc.na
 The core solver is implemented in :class:`xrtpy.xrt_dem_iterative.XRTDEMIterative`.
 
 Conceptually, the solver:
-    1. Builds a regular grid in log10(T) between user-specified bounds.
+    1. Builds a regular grid in :math:`\log_{10}(T)` between user-specified bounds.
     2. Interpolates the filter temperature responses onto that grid.
     3. Represents log10(DEM) as a spline in log10(T).
     4. Uses least-squares fitting (via ``lmfit``) to adjust the spline values so that the modeled filter intensities best match the observed intensities.
