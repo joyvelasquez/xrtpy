@@ -195,7 +195,7 @@ SolarSoft/IDL routine `xrt_dem_iterative2.pro <https://hesperia.gsfc.nasa.gov/ss
 
 Small numerical differences between the Python and IDL implementations can arise due to:
 
-* Different interpolation choices (for example, cubic splines from SciPy).
+* Different interpolation choices (``scipy.interpolate.CubicSpline`` with natural boundary conditions in Python versus IDL's tension spline with :math:`\sigma = 1.0`.).
 * Differences in optimization libraries (`lmfit <https://lmfit.github.io/lmfit-py/>`__ versus IDL `MPFIT <https://www.nv5geospatialsoftware.com/docs/mpfit.html>`__).
 * Floating-point rounding and platform-specific details.
 
