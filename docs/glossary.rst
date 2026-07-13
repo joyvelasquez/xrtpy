@@ -52,7 +52,7 @@ Glossary
       Point Spread Function — describes the response of the telescope to a point source of light. In XRTpy, it is used in deconvolution routines to sharpen images.
 
    Response Matrix
-      A two-dimensional array containing the temperature response of each XRT filter interpolated onto the solver's regular log10 temperature grid.This matrix connects
+      A two-dimensional array containing the temperature response of each XRT filter interpolated onto the solver's regular log10 temperature grid. This matrix connects
       the DEM to the modeled filter intensities through the forward model:
 
       :math:`I_i^{model} = \sum_j DEM(T_j)\, R_i(T_j)\, T_j\, \Delta(\ln T)`.
