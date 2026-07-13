@@ -299,15 +299,6 @@ The values shown match the current defaults and are written out for clarity.
     to suit your specific analysis needs. This mirrors the flexibility of the
     IDL routine ``xrt_dem_iterative2.pro``.
 
-.. Acknowledgement
-.. ---------------
-.. *Development of the DEM solver in XRTpy has been supported in part by
-.. a NASA Heliophysics Tools and Methods (HTM) program grant (ROSES-2025,
-.. element B.20). This effort reflects the ongoing transition of DEM
-.. capabilities from legacy IDL routines into modern, open-source Python
-.. tools for the solar physics community.*
-
-
 References
 ----------
 The following references provide background on the Hinode/XRT instrument and
