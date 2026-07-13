@@ -57,6 +57,10 @@ class XRTDEMIterative:
     - If intensity_uncertainties is not provided, a default model is used to estimate uncertainties.
     """
 
+    # NOTE: If any default parameter values are changed below, update the
+    # corresponding example in docs/dem_overview.rst (Extended example section)
+    # to keep the documentation consistent.
+
     def __init__(
         self,
         observed_channel,
@@ -165,13 +169,6 @@ class XRTDEMIterative:
             raise ValueError("max_iterations must be a positive integer.")
 
         self._max_iterations = int(max_iterations)
-
-        # MOVING ABOVE since never triggered/reached
-        # # Check logarithmic_temperature_step_size is positive
-        # if self._logarithmic_temperature_step_size <= 0:
-        #     raise ValueError(
-        #         "logarithmic_temperature_step_size must be a positive scalar."
-        #     )
 
         # Store temperature response objects
         self.responses = temperature_responses
