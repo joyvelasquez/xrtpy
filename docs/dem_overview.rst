@@ -124,7 +124,14 @@ Solving a DEM
 ~~~~~~~~~~~~~
 .. code-block:: python
 
+    from xrtpy.response.tools import generate_temperature_responses
     from xrtpy.xrt_dem_iterative import XRTDEMIterative
+
+    filters = ["Al-poly", "Ti-poly", "Be-thin", "C-poly"]
+    intensities = [520.0, 104.0, 901.0, 458.0]  # DN/s/pix
+    observation_date = "2012-10-27T10:00:03"
+
+    responses = generate_temperature_responses(filters, observation_date)
 
     dem_solver = XRTDEMIterative(
         observed_channel=filters,
