@@ -46,7 +46,7 @@ Glossary
 
    Monte Carlo DEM
       A set of DEM solutions computed by adding random noise (based on intensity errors) to the observed intensities and re-solving the DEM multiple times.
-      The spread of these Monte Carlo solutions provides an estimate ofuncertainty in the DEM at each temperature.
+      The spread of these Monte Carlo solutions provides an estimate of uncertainty in the DEM at each temperature.
 
    PSF
       Point Spread Function — describes the response of the telescope to a point source of light. In XRTpy, it is used in deconvolution routines to sharpen images.
