@@ -758,6 +758,7 @@ class XRTDEMIterative:
             self._raw_estimated_dem_peaks = (np.array([]), np.array([]))
 
         est_log_dem_on_grid = np.ones_like(self.logT)  # March2026
+        #est_log_dem_on_grid = np.zeros_like(self.logT) #Old
 
         # Return the initial first guessed DEM
         # Store for later use by the solver
@@ -829,12 +830,21 @@ class XRTDEMIterative:
         params = Parameters()
 
         for i in range(self.n_spl):
+            # params.add(
+            #     f"knot_{i}",
+            #     value=float(self.spline_log_dem[i]),
+            #     min=-20.0,
+            #     vary=True,
+            # )
+            #MayJOY
             params.add(
-                f"knot_{i}",
-                value=float(self.spline_log_dem[i]),
-                min=-20.0,
-                vary=True,
-            )
+                f"knot_{i}", 
+                value=0.0, 
+                min=-20.0, 
+                max=None, 
+                vary=True
+                )
+
 
         return params
 
@@ -852,7 +862,8 @@ class XRTDEMIterative:
             cs = CubicSpline(self.spline_logT, knot_vals, bc_type="natural")
             log_dem = cs(self.logT)
 
-        log_dem = np.clip(log_dem, -300.0, 300.0)
+        log_dem = np.clip(log_dem, -300.0, 300.0) 
+        #log_dem = np.clip(log_dem, -20.0, 300.0) #Debugging - too forced
         dem = 10.0**log_dem
         return dem
 
@@ -886,15 +897,19 @@ class XRTDEMIterative:
         residuals = (i_mod - y_scaled) * self.weights / sigma_scaled
 
         # # chi^2 history, mostly for debugging
-        # chi2_val = np.sum(residuals**2)
-        # # JOY March 2026
-        # if not hasattr(self, "_iteration_chi2"):
-        #     self._iteration_chi2 = []
-        # #self._iteration_chi2.append(chi2_val)
         chi2_val = np.sum(residuals**2)
+        # JOY March 2026
         if not hasattr(self, "_iteration_chi2"):
             self._iteration_chi2 = []
         self._iteration_chi2.append(chi2_val)
+        
+        # chi2_val = np.sum(residuals**2)
+        # if not hasattr(self, "_iteration_chi2"):
+        #     self._iteration_chi2 = []
+        # self._iteration_chi2.append(chi2_val)
+        
+
+
 
         return residuals
 

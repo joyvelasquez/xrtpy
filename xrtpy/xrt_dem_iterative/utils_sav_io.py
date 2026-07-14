@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 """
 Shared utilities for loading IDL DEM .sav files and parsing their filenames.
 
@@ -11,6 +12,8 @@ Compact filter name → XRTpy filter name mapping is handled automatically.
 Will be updated once I start testing with MC.
 """
 
+=======
+>>>>>>> Stashed changes
 from __future__ import annotations
 
 import re
@@ -20,8 +23,13 @@ from pathlib import Path
 import numpy as np
 from scipy.io import readsav
 
+<<<<<<< Updated upstream
 # Filter name mapping — compact filename token → XRTpy filter name
 # Keys are sorted longest-first at parse time to handle compound filters
+=======
+
+# XRTpy filter name -Keys are sorted longest-first at parse time to handle compound filters
+>>>>>>> Stashed changes
 # (e.g. "AlpolyTipoly" must be matched before "Alpoly")
 
 _FILTER_MAP: dict[str, str] = {
