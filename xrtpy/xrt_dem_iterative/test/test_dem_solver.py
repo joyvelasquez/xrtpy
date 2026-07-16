@@ -1,12 +1,15 @@
 import warnings
 
 import astropy.units as u
-import matplotlib
+
+# import matplotlib
+import matplotlib as mpl
 import numpy as np
 import pytest
 from lmfit import Parameters
 
-matplotlib.use("Agg")
+mpl.use("Agg")
+# matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from xrtpy.response.channel import Channel
@@ -158,10 +161,8 @@ def test_estimate_initial_dem_returns_flat_log_dem_one():
     # TEST 1: Correct length
     assert len(est) == len(x.logT)
 
-    # TEST 2: All values should be exactly 0.0 ( Python implementation overrides with flat logDEM = 0)
-    assert np.allclose(
-        est, 1.0
-    )  # 0.0) #JOY- Updated March 17, 2026 -Python implementation overrides with flat logDEM = 0
+    # TEST 2: All values exactly 1.0 (IDL flat initial guess, log10(DEM) = 1)
+    assert np.allclose(est, 1.0)
 
     # TEST 3: Internal storage _initial_log_dem should match
     assert np.allclose(x._initial_log_dem, est)
@@ -203,6 +204,7 @@ def test_prepare_spline_system_initializes_all_solver_state():
     assert np.all(np.diff(x.spline_logT) > 0)
 
     # spline_log_dem should be zeros (flat initial DEM)
+    # spline_log_dem starts at 1.0 (IDL flat initial guess)
     assert len(x.spline_log_dem) == 2
     assert np.allclose(x.spline_log_dem, 1.0)  # 0.0) - March 2026 Edit
 
@@ -269,10 +271,9 @@ def test_solve_single_dem_returns_zeros_when_all_intensities_zero():
         - result = None
     This run will output a warning - expected due to no intensity_uncertainties provided.
     """
-    # filterwarnings = ignore:No intensity_uncertainties provided
 
     filters = ["Al-poly", "Ti-poly", "Al-mesh"]
-    intensities = np.array([0.0, 0.0, 0])  # all zero → triggers nosolve
+    intensities = np.array([0.0, 0.0, 0])
     responses = generate_temperature_responses(filters, "2022-11-27T00:00:00")
 
     x = XRTDEMIterative(
@@ -288,7 +289,7 @@ def test_solve_single_dem_returns_zeros_when_all_intensities_zero():
         observed_intensities_vals=intensities
     )
 
-    # Assertions matching IDL behavior -DEM must be zero everywhere
+    # Assertions matching IDL behavior - DEM must be zero everywhere
     assert np.all(dem == 0.0)
 
     # modeled intensities must be all zero
@@ -326,7 +327,6 @@ def test_monte_carlo_produces_non_identical_realizations(monkeypatch):
 
     # Make Monte Carlo deterministic for CI/test stability
     _orig_default_rng = np.random.default_rng
-    # monkeypatch.setattr(np.random, "default_rng", lambda *a, **k: _orig_default_rng(0))
     monkeypatch.setattr(np.random, "default_rng", lambda *_, **__: _orig_default_rng(0))
 
     x = XRTDEMIterative(
@@ -483,10 +483,6 @@ def test_warns_when_intensity_is_negative():
 
 def test_plot_dem_runs_without_error():
     """Smoke test — plot_dem() completes without raising."""
-    # import matplotlib
-
-    # matplotlib.use("Agg")
-    # import matplotlib.pyplot as plt
 
     filters = ["Al-poly", "Ti-poly", "Be-thin"]
     intensities = np.array([500.0, 1800.0, 820.0], dtype=float)
@@ -784,7 +780,7 @@ def test_init_rejects_empty_observed_channel():
     intensities = np.array([500.0, 800.0])
     responses = generate_temperature_responses(filters, "2012-10-27T00:00:00")
 
-    with pytest.raises((ValueError, Exception)):
+    with pytest.raises(ValueError, match="required and cannot be empty"):
         XRTDEMIterative([], intensities, responses)
 
 
@@ -848,7 +844,7 @@ def test_relative_uncertainty_property_is_three_percent():
 
 
 @pytest.mark.parametrize(
-    "intensity,expected_sigma",
+    ("intensity", "expected_sigma"),
     [
         (1.0, 2.0),  # 3% of 1.0 = 0.03 < 2.0 → floor at 2.0
         (50.0, 2.0),  # 3% of 50 = 1.5 < 2.0 → floor at 2.0
@@ -866,8 +862,6 @@ def test_default_intensity_uncertainties_apply_correct_model(intensity, expected
     responses = generate_temperature_responses(filters, "2012-10-27T00:00:00")
 
     x = XRTDEMIterative(filters, intensities, responses)
-
-    import warnings
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", UserWarning)
@@ -1000,7 +994,7 @@ def test_validate_inputs_raises_when_temperature_grid_too_small():
 
 
 @pytest.mark.parametrize(
-    "n_filters,expected_n_spl",
+    ("n_filters", "expected_n_spl"),
     [
         (2, 1),  # min(max(2-1,1),7) = 1
         (3, 2),  # min(max(3-1,1),7) = 2
@@ -1039,9 +1033,6 @@ def test_n_spl_formula_for_various_filter_counts(n_filters, expected_n_spl):
     assert x.n_spl == expected_n_spl
 
 
-# _build_lmfit_parameters
-
-
 def test_build_lmfit_parameters_count_bounds_and_initial_values():
     """_build_lmfit_parameters must produce exactly n_spl parameters,
     each named 'knot_i', with lower bound -20, and initialized from spline_log_dem.
@@ -1068,9 +1059,6 @@ def test_build_lmfit_parameters_count_bounds_and_initial_values():
         p = params[f"knot_{i}"]
         assert p.min == pytest.approx(-20.0)
         assert p.value == pytest.approx(x.spline_log_dem[i])
-
-
-# solve() ROW-0 CONTRACT
 
 
 def test_solve_mc_row_zero_matches_base_solution():
@@ -1114,9 +1102,6 @@ def test_solve_mc_row_zero_contract_with_n_equals_zero():
     np.testing.assert_array_equal(x.mc_base_obs[0], intensities)
 
 
-# __repr__
-
-
 def test_repr_contains_key_fields():
     """__repr__ must include filter names, the logT range, and the step size.
     Expected: repr string containing 'Al-poly', '5.5', '8.0', '0.10'.
@@ -1132,9 +1117,6 @@ def test_repr_contains_key_fields():
     assert "5.5" in r
     assert "8.0" in r
     assert "0.10" in r
-
-
-# SINGLE-FILTER EDGE CASE
 
 
 def test_solve_with_single_filter_completes_without_error():
