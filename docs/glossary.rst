@@ -12,7 +12,7 @@ Glossary
 
    Channel
       A specific configuration of the XRT instrument, defined by the combination of filters in both filter wheels. Each channel affects the telescope's sensitivity and spectral response.
-   
+
    Chi-Square (:math:`\chi^2`)
       A goodness-of-fit statistic that measures how well the modeled filter intensities match the observed intensities. It is computed as:
 

@@ -211,7 +211,7 @@ mathematical derivation.
 
 The DEM inversion problem is underdetermined — there are more temperature
 bins than observed channels — meaning that multiple thermal distributions
-can reproduce the same set of observations. For each filter channel :math:`i`, the 
+can reproduce the same set of observations. For each filter channel :math:`i`, the
 observed intensity :math:`I_i` is related to the
 DEM by
 
