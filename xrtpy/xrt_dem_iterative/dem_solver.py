@@ -758,7 +758,7 @@ class XRTDEMIterative:
             self._raw_estimated_dem_peaks = (np.array([]), np.array([]))
 
         est_log_dem_on_grid = np.ones_like(self.logT)  # March2026
-        #est_log_dem_on_grid = np.zeros_like(self.logT) #Old
+        # est_log_dem_on_grid = np.zeros_like(self.logT) #Old
 
         # Return the initial first guessed DEM
         # Store for later use by the solver
@@ -829,22 +829,31 @@ class XRTDEMIterative:
 
         params = Parameters()
 
+        # for i, val in enumerate(self.spline_log_dem):
+        #     # Start each knot from the IDL flat initial guess
+        #     # (log10 scaled DEM = 1.0), as xrt_dem_iter_solver line 233 does.
+        #     params.add(
+        #         f"knot_{i}",
+        #         value=float(val),
+        #         min=-20.0,
+        #         max=None,
+        #         vary=True,
+        #     )
         for i in range(self.n_spl):
-            # params.add(
-            #     f"knot_{i}",
-            #     value=float(self.spline_log_dem[i]),
-            #     min=-20.0,
-            #     vary=True,
-            # )
-            #MayJOY
             params.add(
-                f"knot_{i}", 
-                value=0.0, 
-                min=-20.0, 
-                max=None, 
-                vary=True
-                )
-
+                f"knot_{i}",
+                value=float(self.spline_log_dem[i]),
+                min=-20.0,
+                vary=True,
+            )
+        #     #MayJOY
+        # params.add(
+        #     f"knot_{i}",
+        #     value=0.0,
+        #     min=-20.0,
+        #     max=None,
+        #     vary=True
+        #     )
 
         return params
 
@@ -862,8 +871,8 @@ class XRTDEMIterative:
             cs = CubicSpline(self.spline_logT, knot_vals, bc_type="natural")
             log_dem = cs(self.logT)
 
-        log_dem = np.clip(log_dem, -300.0, 300.0) 
-        #log_dem = np.clip(log_dem, -20.0, 300.0) #Debugging - too forced
+        log_dem = np.clip(log_dem, -300.0, 300.0)
+        # log_dem = np.clip(log_dem, -20.0, 300.0) #Debugging - too forced
         dem = 10.0**log_dem
         return dem
 
@@ -902,14 +911,11 @@ class XRTDEMIterative:
         if not hasattr(self, "_iteration_chi2"):
             self._iteration_chi2 = []
         self._iteration_chi2.append(chi2_val)
-        
+
         # chi2_val = np.sum(residuals**2)
         # if not hasattr(self, "_iteration_chi2"):
         #     self._iteration_chi2 = []
         # self._iteration_chi2.append(chi2_val)
-        
-
-
 
         return residuals
 
@@ -936,7 +942,9 @@ class XRTDEMIterative:
         # 3. initial guess (log10 DEM_model on grid)
         init_log_dem = self._estimate_initial_dem()  # flat ~ 1.0 in IDL
         self._initial_log_dem = init_log_dem
-        self._iteration_chi2 = []  # reset chi2 history for this solve pass JOY March 2026
+        self._iteration_chi2 = (
+            []
+        )  # reset chi2 history for this solve pass JOY March 2026
 
         # 4. spline system using that initial guess
         self._prepare_spline_system()
