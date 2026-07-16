@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 """
 Shared utilities for loading IDL DEM .sav files and parsing their filenames.
 
@@ -12,8 +11,6 @@ Compact filter name → XRTpy filter name mapping is handled automatically.
 Will be updated once I start testing with MC.
 """
 
-=======
->>>>>>> Stashed changes
 from __future__ import annotations
 
 import re
@@ -23,13 +20,7 @@ from pathlib import Path
 import numpy as np
 from scipy.io import readsav
 
-<<<<<<< Updated upstream
-# Filter name mapping — compact filename token → XRTpy filter name
-# Keys are sorted longest-first at parse time to handle compound filters
-=======
-
 # XRTpy filter name -Keys are sorted longest-first at parse time to handle compound filters
->>>>>>> Stashed changes
 # (e.g. "AlpolyTipoly" must be matched before "Alpoly")
 
 _FILTER_MAP: dict[str, str] = {
@@ -88,7 +79,8 @@ class SavCase:
 class IDLResult:
     """Loaded IDL DEM solution."""
 
-    logT: np.ndarray  # (nT,) log10 K
+    # (nT,) log10 K
+    logT: np.ndarray  # noqa: N815
     dem: np.ndarray  # (nT,) cm^-5 K^-1
 
 
@@ -240,6 +232,6 @@ def discover_cases(data_dir: str | Path) -> list[SavCase]:
     for sav_file in sorted(data_dir.glob("xrt_IDL_dem_*.sav")):
         try:
             cases.append(parse_sav_filename(sav_file))
-        except ValueError as exc:
+        except ValueError as exc:  # noqa: PERF203
             print(f"  Warning: skipping {sav_file.name} — {exc}")
     return cases
