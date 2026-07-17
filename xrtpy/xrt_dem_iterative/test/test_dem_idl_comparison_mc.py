@@ -1,6 +1,3 @@
-
-"Empty for now"
-
 """
 test_dem_idl_comparison_mc.py
 ==============================
@@ -42,12 +39,11 @@ The tests discover all files automatically. If a new case has a known
 systematic failure, add an entry to _XFAIL_REASONS.
 """
 
-from pathlib import Path
 import warnings
+from pathlib import Path
 
 import numpy as np
 import pytest
-
 from utils_sav_io import (
     IDLMCResult,
     SavCase,
@@ -62,10 +58,10 @@ from xrtpy.xrt_dem_iterative import XRTDEMIterative
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-MC_DIR    = Path(__file__).parent / "data" / "validation" / "monte_carlo"
-BASE_DIR  = Path(__file__).parent / "data" / "validation" / "base"
-DEM_FLOOR = 1e10     # cm^-5 K^-1 — bins below this ignored
-LOG_FLOOR = 1e-99    # for log10 computation
+MC_DIR = Path(__file__).parent / "data" / "validation" / "monte_carlo"
+BASE_DIR = Path(__file__).parent / "data" / "validation" / "base"
+DEM_FLOOR = 1e10  # cm^-5 K^-1 — bins below this ignored
+LOG_FLOOR = 1e-99  # for log10 computation
 
 # Tolerance: median curves must agree within this many dex
 MEDIAN_DEX_TOL = 0.50
@@ -139,6 +135,7 @@ def _xfail_if_known(case: SavCase, test_name: str) -> None:
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _log10(dem: np.ndarray) -> np.ndarray:
     return np.log10(np.maximum(dem, LOG_FLOOR))
 
@@ -160,18 +157,19 @@ def _ensemble_stats(dem_mc: np.ndarray) -> dict:
     -------
     dict with keys: median, p16, p84, sigma  — all in log10 space, shape (nT,)
     """
-    log_mc = _log10(dem_mc)   # (n_runs, nT)
+    log_mc = _log10(dem_mc)  # (n_runs, nT)
     return {
         "median": np.median(log_mc, axis=0),
-        "p16":    np.percentile(log_mc, 16, axis=0),
-        "p84":    np.percentile(log_mc, 84, axis=0),
-        "sigma":  np.std(log_mc, axis=0),
+        "p16": np.percentile(log_mc, 16, axis=0),
+        "p84": np.percentile(log_mc, 84, axis=0),
+        "sigma": np.std(log_mc, axis=0),
     }
 
 
 # ---------------------------------------------------------------------------
 # Case discovery
 # ---------------------------------------------------------------------------
+
 
 def _collect_mc_cases() -> list[SavCase]:
     if not MC_DIR.exists():
@@ -189,6 +187,7 @@ def _case_id(case: SavCase) -> str:
 # ---------------------------------------------------------------------------
 # Session fixture — solve everything once per case
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(scope="session", params=MC_CASES, ids=_case_id)
 def mc_solved(request) -> tuple[SavCase, IDLMCResult, XRTDEMIterative]:
@@ -212,7 +211,8 @@ def mc_solved(request) -> tuple[SavCase, IDLMCResult, XRTDEMIterative]:
 
     # Replace dem_base with the TRUE base DEM from the standalone base SAV
     base_matches = [
-        f for f in BASE_DIR.glob(f"xrt_IDL_dem_{case.label}_*.sav")
+        f
+        for f in BASE_DIR.glob(f"xrt_IDL_dem_{case.label}_*.sav")
         if "MC" not in f.name
     ]
     if base_matches:
@@ -233,9 +233,7 @@ def mc_solved(request) -> tuple[SavCase, IDLMCResult, XRTDEMIterative]:
     # Run XRTpy solver with same number of MC iterations
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        responses = generate_temperature_responses(
-            case.filters, case.observation_date
-        )
+        responses = generate_temperature_responses(case.filters, case.observation_date)
         solver = XRTDEMIterative(
             observed_channel=case.filters,
             observed_intensities=case.intensities_array,
@@ -251,6 +249,7 @@ def mc_solved(request) -> tuple[SavCase, IDLMCResult, XRTDEMIterative]:
 # Tests
 # ---------------------------------------------------------------------------
 
+
 def test_idl_mc_loaded_correctly(mc_solved):
     """IDL MC SAV must have the right shape and no NaNs."""
     case, idl, _ = mc_solved
@@ -258,19 +257,14 @@ def test_idl_mc_loaded_correctly(mc_solved):
         f"[{case.label}] dem_mc must be 2D (n_runs, nT), got ndim={idl.dem_mc.ndim}"
     )
     assert idl.dem_mc.shape[0] == case.mc_runs, (
-        f"[{case.label}] Expected {case.mc_runs} MC runs, "
-        f"got {idl.dem_mc.shape[0]}"
+        f"[{case.label}] Expected {case.mc_runs} MC runs, got {idl.dem_mc.shape[0]}"
     )
     assert idl.dem_mc.shape[1] == len(idl.logT), (
         f"[{case.label}] dem_mc columns ({idl.dem_mc.shape[1]}) "
         f"!= len(logT) ({len(idl.logT)})"
     )
-    assert np.all(np.isfinite(idl.dem_mc)), (
-        f"[{case.label}] NaN/Inf in IDL dem_mc"
-    )
-    assert np.all(idl.dem_mc >= 0), (
-        f"[{case.label}] Negative values in IDL dem_mc"
-    )
+    assert np.all(np.isfinite(idl.dem_mc)), f"[{case.label}] NaN/Inf in IDL dem_mc"
+    assert np.all(idl.dem_mc >= 0), f"[{case.label}] Negative values in IDL dem_mc"
 
 
 def test_xrtpy_mc_produced_correctly(mc_solved):
@@ -280,20 +274,15 @@ def test_xrtpy_mc_produced_correctly(mc_solved):
     assert xrtpy.mc_dem.shape == expected_shape, (
         f"[{case.label}] mc_dem shape {xrtpy.mc_dem.shape} != {expected_shape}"
     )
-    assert np.all(np.isfinite(xrtpy.mc_dem)), (
-        f"[{case.label}] NaN/Inf in XRTpy mc_dem"
-    )
-    assert np.all(xrtpy.mc_dem >= 0), (
-        f"[{case.label}] Negative values in XRTpy mc_dem"
-    )
+    assert np.all(np.isfinite(xrtpy.mc_dem)), f"[{case.label}] NaN/Inf in XRTpy mc_dem"
+    assert np.all(xrtpy.mc_dem >= 0), f"[{case.label}] Negative values in XRTpy mc_dem"
 
 
 def test_logt_grids_match(mc_solved):
     """IDL and XRTpy must use the same logT grid."""
     case, idl, xrtpy = mc_solved
     np.testing.assert_allclose(
-        idl.logT, xrtpy.logT, atol=1e-6,
-        err_msg=f"[{case.label}] logT grids differ"
+        idl.logT, xrtpy.logT, atol=1e-6, err_msg=f"[{case.label}] logT grids differ"
     )
 
 
@@ -302,12 +291,12 @@ def test_peak_temperature_agreement(mc_solved):
     case, idl, xrtpy = mc_solved
 
     idl_stats = _ensemble_stats(idl.dem_mc)
-    xrt_mc    = xrtpy.mc_dem[1:]   # exclude row 0 (base)
+    xrt_mc = xrtpy.mc_dem[1:]  # exclude row 0 (base)
     xrt_stats = _ensemble_stats(xrt_mc)
 
     pk_idl = idl.logT[np.argmax(idl_stats["median"])]
     pk_xrt = xrtpy.logT[np.argmax(xrt_stats["median"])]
-    diff   = abs(pk_idl - pk_xrt)
+    diff = abs(pk_idl - pk_xrt)
 
     print(f"\n  [{case.label}]  IDL median peak logT = {pk_idl:.2f}")
     print(f"  [{case.label}]  XRTpy median peak logT = {pk_xrt:.2f}  Δ={diff:.3f}")
@@ -328,21 +317,23 @@ def test_median_dem_agreement(mc_solved):
     _xfail_if_known(case, "test_median_dem_agreement")
 
     idl_stats = _ensemble_stats(idl.dem_mc)
-    xrt_mc    = xrtpy.mc_dem[1:]
+    xrt_mc = xrtpy.mc_dem[1:]
     xrt_stats = _ensemble_stats(xrt_mc)
 
     mask = (
-        _valid_mask(idl.dem_base, xrtpy.dem) &
-        np.isfinite(idl_stats["median"]) &
-        np.isfinite(xrt_stats["median"])
+        _valid_mask(idl.dem_base, xrtpy.dem)
+        & np.isfinite(idl_stats["median"])
+        & np.isfinite(xrt_stats["median"])
     )
     assert mask.sum() >= 5, f"[{case.label}] Too few valid bins"
 
     diff = np.abs(idl_stats["median"][mask] - xrt_stats["median"][mask])
     mean_diff = float(np.mean(diff))
-    max_diff  = float(np.max(diff))
+    max_diff = float(np.max(diff))
 
-    print(f"\n  [{case.label}]  Median |Δ| mean={mean_diff:.3f}  max={max_diff:.3f} dex")
+    print(
+        f"\n  [{case.label}]  Median |Δ| mean={mean_diff:.3f}  max={max_diff:.3f} dex"
+    )
     assert mean_diff < MEDIAN_DEX_TOL, (
         f"[{case.label}] Median DEM mean|Δ| = {mean_diff:.3f} > {MEDIAN_DEX_TOL} dex"
     )
@@ -358,17 +349,16 @@ def test_xrtpy_base_within_idl_spread(mc_solved):
     case, idl, xrtpy = mc_solved
     _xfail_if_known(case, "test_xrtpy_base_within_idl_spread")
 
-    idl_stats    = _ensemble_stats(idl.dem_mc)
+    idl_stats = _ensemble_stats(idl.dem_mc)
     log_xrt_base = _log10(xrtpy.dem)
-    mask         = _valid_mask(idl.dem_base, xrtpy.dem)
+    mask = _valid_mask(idl.dem_base, xrtpy.dem)
 
-    in_band = (
-        (log_xrt_base >= idl_stats["p16"]) &
-        (log_xrt_base <= idl_stats["p84"])
-    )
+    in_band = (log_xrt_base >= idl_stats["p16"]) & (log_xrt_base <= idl_stats["p84"])
     frac_in = float(np.sum(in_band[mask]) / mask.sum())
 
-    print(f"\n  [{case.label}]  XRTpy base within IDL 1σ band: {frac_in:.1%} of valid bins")
+    print(
+        f"\n  [{case.label}]  XRTpy base within IDL 1σ band: {frac_in:.1%} of valid bins"
+    )
     assert frac_in >= 0.50, (
         f"[{case.label}] XRTpy base DEM inside IDL MC 1σ band in only "
         f"{frac_in:.1%} of valid bins (need >= 50%)"
@@ -385,18 +375,17 @@ def test_idl_base_within_xrtpy_spread(mc_solved):
     case, idl, xrtpy = mc_solved
     _xfail_if_known(case, "test_idl_base_within_xrtpy_spread")
 
-    xrt_mc       = xrtpy.mc_dem[1:]
-    xrt_stats    = _ensemble_stats(xrt_mc)
+    xrt_mc = xrtpy.mc_dem[1:]
+    xrt_stats = _ensemble_stats(xrt_mc)
     log_idl_base = _log10(idl.dem_base)
-    mask         = _valid_mask(idl.dem_base, xrtpy.dem)
+    mask = _valid_mask(idl.dem_base, xrtpy.dem)
 
-    in_band = (
-        (log_idl_base >= xrt_stats["p16"]) &
-        (log_idl_base <= xrt_stats["p84"])
-    )
+    in_band = (log_idl_base >= xrt_stats["p16"]) & (log_idl_base <= xrt_stats["p84"])
     frac_in = float(np.sum(in_band[mask]) / mask.sum())
 
-    print(f"\n  [{case.label}]  IDL base within XRTpy 1σ band: {frac_in:.1%} of valid bins")
+    print(
+        f"\n  [{case.label}]  IDL base within XRTpy 1σ band: {frac_in:.1%} of valid bins"
+    )
     assert frac_in >= 0.50, (
         f"[{case.label}] IDL base DEM inside XRTpy MC 1σ band in only "
         f"{frac_in:.1%} of valid bins (need >= 50%)"
@@ -419,10 +408,10 @@ def test_spread_magnitude_similar(mc_solved):
     _xfail_if_known(case, "test_spread_magnitude_similar")
 
     idl_stats = _ensemble_stats(idl.dem_mc)
-    xrt_mc    = xrtpy.mc_dem[1:]
+    xrt_mc = xrtpy.mc_dem[1:]
     xrt_stats = _ensemble_stats(xrt_mc)
 
-    mask      = _valid_mask(idl.dem_base, xrtpy.dem)
+    mask = _valid_mask(idl.dem_base, xrtpy.dem)
     idl_sigma = idl_stats["sigma"][mask]
     xrt_sigma = xrt_stats["sigma"][mask]
 
@@ -431,9 +420,8 @@ def test_spread_magnitude_similar(mc_solved):
     if not np.any(both_nonzero):
         pytest.skip("No bins with non-trivial spread in both ensembles")
 
-    ratio = (
-        np.maximum(idl_sigma[both_nonzero], xrt_sigma[both_nonzero]) /
-        np.minimum(idl_sigma[both_nonzero], xrt_sigma[both_nonzero])
+    ratio = np.maximum(idl_sigma[both_nonzero], xrt_sigma[both_nonzero]) / np.minimum(
+        idl_sigma[both_nonzero], xrt_sigma[both_nonzero]
     )
     median_ratio = float(np.median(ratio))
 
@@ -452,7 +440,7 @@ def test_diagnostic_mc_summary(mc_solved):
     case, idl, xrtpy = mc_solved
 
     idl_stats = _ensemble_stats(idl.dem_mc)
-    xrt_mc    = xrtpy.mc_dem[1:]
+    xrt_mc = xrtpy.mc_dem[1:]
     xrt_stats = _ensemble_stats(xrt_mc)
 
     mask = _valid_mask(idl.dem_base, xrtpy.dem)
@@ -461,18 +449,18 @@ def test_diagnostic_mc_summary(mc_solved):
     print(f"\n{sep}")
     print(f"  MC ENSEMBLE SUMMARY  |  Case: {case.label}  ({case.observation_date})")
     print(f"  Filters: {case.filters}")
-    print(f"  IDL runs: {idl.n_runs}   XRTpy runs: {xrtpy.mc_dem.shape[0]-1}")
+    print(f"  IDL runs: {idl.n_runs}   XRTpy runs: {xrtpy.mc_dem.shape[0] - 1}")
     print(f"{sep}")
     print(
         f"  {'logT':>6}  {'IDL med':>9}  {'IDL σ':>7}  "
         f"{'XRT med':>9}  {'XRT σ':>7}  {'Δmed':>7}  valid"
     )
-    print(f"  {'-'*65}")
+    print(f"  {'-' * 65}")
 
     for i, lt in enumerate(idl.logT):
         if not mask[i]:
             continue
-        dm   = idl_stats["median"][i] - xrt_stats["median"][i]
+        dm = idl_stats["median"][i] - xrt_stats["median"][i]
         flag = " *" if abs(dm) > MEDIAN_DEX_TOL else "  "
         print(
             f"  {lt:>6.2f}  {idl_stats['median'][i]:>9.3f}  "
@@ -483,23 +471,21 @@ def test_diagnostic_mc_summary(mc_solved):
         )
 
     diff = np.abs(idl_stats["median"][mask] - xrt_stats["median"][mask])
-    print(f"  {'-'*65}")
+    print(f"  {'-' * 65}")
     print(f"  Mean |Δmedian| = {np.mean(diff):.4f} dex")
     print(f"  Max  |Δmedian| = {np.max(diff):.4f} dex")
     print(f"  XRTpy base χ²  = {xrtpy.chisq:.2f}")
-    print(f"  IDL base χ²:     (not stored in MC SAV)")
+    print("  IDL base χ²:     (not stored in MC SAV)")
 
     known = [t for (c, t) in _XFAIL_REASONS if c == case.label]
     if known:
-        print(f"  Known xfail tests for this case:")
+        print("  Known xfail tests for this case:")
         for t in known:
             print(f"    - {t}")
 
     print(f"{sep}\n")
-    
-    
-    
-from xrtpy.response.tools import generate_temperature_responses
+
+
 from xrtpy.xrt_dem_iterative import XRTDEMIterative
 
 filters = [
@@ -536,4 +522,3 @@ dem_solver.solve()
 dem_solver.plot_dem()
 dem_solver.plot_dem_mc()
 dem_solver.summary()
-

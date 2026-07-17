@@ -119,7 +119,7 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
     print(f"  IDL  peak:     logT = {logT_idl[np.argmax(idl.dem)]:.2f}")
     print(f"  XRTpy peak:    logT = {logT_xrt[np.argmax(solver.dem)]:.2f}")
     print("  Per-filter log10(modeled/observed):")
-    for f, lr in zip(case.filters, log_ratio):
+    for f, lr in zip(case.filters, log_ratio, strict=True):
         flag = "  ← !" if abs(lr) > 1.0 else ""
         print(f"    {f:<22} {lr:+.3f}{flag}")
     print(f"  {'─' * 55}")
@@ -179,31 +179,8 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
     ax1.set_title("DEM(T) comparison", fontsize=11)
     ax1.set_xlim(5.4, 8.1)
     ax1.legend(fontsize=9, loc="upper right")
-    ax1.grid(True, alpha=0.25)
+    ax1.grid(visible=True, alpha=0.25)
 
-    # Annotate peaks
-    pk_idl = logT_idl[np.argmax(idl.dem)]
-    pk_xrt = logT_xrt[np.argmax(solver.dem)]
-    y_top_idl = log_dem_idl.max()
-    y_top_xrt = log_dem_xrt.max()
-
-    # Maybelater
-    # ax1.annotate(
-    #     f"IDL\nlogT={pk_idl:.2f}",
-    #     xy=(pk_idl, y_top_idl),
-    #     xytext=(pk_idl - 0.7, y_top_idl - 2.5),
-    #     fontsize=8, color="#BA7517",
-    #     arrowprops=dict(arrowstyle="->", color="#BA7517", lw=0.8),
-    # )
-    # ax1.annotate(
-    #     f"XRTpy\nlogT={pk_xrt:.2f}",
-    #     xy=(pk_xrt, y_top_xrt),
-    #     xytext=(pk_xrt + 0.15, y_top_xrt - 3.5),
-    #     fontsize=8, color="#185FA5",
-    #     arrowprops=dict(arrowstyle="->", color="#185FA5", lw=0.8),
-    # )
-
-    # ── Panel 2: Δ per bin ───────────────────────────────────────────────
     ax2 = fig.add_subplot(gs[1])
 
     bar_colors = [_bar_color(d) for d in delta]
@@ -238,7 +215,7 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
         fontsize=11,
     )
     ax2.legend(fontsize=9, loc="upper left")
-    ax2.grid(True, alpha=0.25, axis="y")
+    ax2.grid(visible=True, alpha=0.25, axis="y")
 
     # ── Panel 3: per-filter intensities ──────────────────────────────────
     ax3 = fig.add_subplot(gs[2])
@@ -257,7 +234,7 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
     )
     ax3.bar(x + w / 2, modeled, w, label="XRTpy modeled", color="#85B7EB", alpha=0.85)
 
-    for i, (obs, mod) in enumerate(zip(case.intensities_array, modeled)):
+    for i, (obs, mod) in enumerate(zip(case.intensities_array, modeled, strict=True)):
         lr = np.log10(max(mod / obs, 1e-99))
         color = "#E24B4A" if abs(lr) > 1.0 else "#185FA5"
         ax3.text(
@@ -280,7 +257,7 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
         fontsize=11,
     )
     ax3.legend(fontsize=9)
-    ax3.grid(True, alpha=0.25, axis="y")
+    ax3.grid(visible=True, alpha=0.25, axis="y")
     ax3.set_xlim(-0.6, n_filters - 0.4)
 
     ax3.text(
@@ -292,9 +269,12 @@ def make_figure(case: SavCase, idl: IDLResult, solver: XRTDEMIterative) -> plt.F
         va="top",
         fontsize=9,
         color="#E24B4A",
-        bbox=dict(
-            boxstyle="round,pad=0.3", facecolor="white", edgecolor="#E24B4A", alpha=0.8
-        ),
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": "white",
+            "edgecolor": "#E24B4A",
+            "alpha": 0.8,
+        },
     )
 
     return fig
@@ -352,7 +332,7 @@ def main() -> None:
 
         try:
             idl, solver = solve_case(case)
-        except Exception as exc:
+        except Exception as exc:  # noqa: BLE001
             print(f"  ERROR: {exc}")
             continue
 

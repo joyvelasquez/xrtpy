@@ -1,13 +1,13 @@
 from pathlib import Path
-import numpy as np
+
 import matplotlib
+import numpy as np
 
 # No GUI needed since we're only saving PNGs
 matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 from scipy.io import readsav
-
 
 # -----------------------------------------------------------------------------
 # Directories
@@ -28,6 +28,7 @@ OUT_DIR.mkdir(parents=True, exist_ok=True)
 # Load IDL .sav file
 # -----------------------------------------------------------------------------
 
+
 def load_idl_base(dem_id, nfilters):
     """
     Load IDL base DEM .sav file.
@@ -39,8 +40,7 @@ def load_idl_base(dem_id, nfilters):
     chisq : float
     """
     sav_file = (
-        IDL_DIR
-        / f"idl_dem_idx{dem_id}_base_wErrors_10Oct2008_{nfilters}filters.sav"
+        IDL_DIR / f"idl_dem_idx{dem_id}_base_wErrors_10Oct2008_{nfilters}filters.sav"
     )
 
     if not sav_file.exists():
@@ -58,6 +58,7 @@ def load_idl_base(dem_id, nfilters):
 # -----------------------------------------------------------------------------
 # Plot one DEM
 # -----------------------------------------------------------------------------
+
 
 def plot_idl_dem(dem_id, nfilters):
 
@@ -77,14 +78,10 @@ def plot_idl_dem(dem_id, nfilters):
         label=rf"IDL  |  $\chi^2$ = {chisq:.4f}",
     )
 
-    ax.set_title(
-        f"IDL Base DEM\nDEM Index {dem_id} — {nfilters} Filters"
-    )
+    ax.set_title(f"IDL Base DEM\nDEM Index {dem_id} — {nfilters} Filters")
 
     ax.set_xlabel(r"$\log_{10}(T)$ [K]")
-    ax.set_ylabel(
-        r"$\log_{10}(\mathrm{DEM})$ [cm$^{-5}$ K$^{-1}$]"
-    )
+    ax.set_ylabel(r"$\log_{10}(\mathrm{DEM})$ [cm$^{-5}$ K$^{-1}$]")
 
     ax.set_xlim(5.5, 8.0)
     ax.set_ylim(16, 26)
@@ -95,8 +92,7 @@ def plot_idl_dem(dem_id, nfilters):
     fig.tight_layout()
 
     outfile = (
-        OUT_DIR
-        / f"idl_dem_idx{dem_id}_base_wErrors_10Oct2008_{nfilters}filters.png"
+        OUT_DIR / f"idl_dem_idx{dem_id}_base_wErrors_10Oct2008_{nfilters}filters.png"
     )
 
     fig.savefig(
@@ -115,7 +111,6 @@ def plot_idl_dem(dem_id, nfilters):
 # -----------------------------------------------------------------------------
 
 if __name__ == "__main__":
-
     dem_ids = [14, 15, 65, 99, 112, 159]
     filter_counts = [4, 5, 6, 7]
 
@@ -124,9 +119,6 @@ if __name__ == "__main__":
             try:
                 plot_idl_dem(dem_id, nfilters)
             except Exception as e:
-                print(
-                    f"FAILED: DEM {dem_id}, "
-                    f"{nfilters} filters\n{e}\n"
-                )
+                print(f"FAILED: DEM {dem_id}, {nfilters} filters\n{e}\n")
 
     print(f"\nAll plots saved to:\n{OUT_DIR}")

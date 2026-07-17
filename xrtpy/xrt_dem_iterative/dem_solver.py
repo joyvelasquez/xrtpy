@@ -617,7 +617,8 @@ class XRTDEMIterative:
             rows.append(interp_func(self.logT))
 
         self.interpolated_responses = rows
-        self._response_matrix = np.vstack(rows).astype(float)
+        #self._response_matrix = np.vstack(rows).astype(float) #JOY-UPDATED-JULY16
+        self._response_matrix = np.maximum(np.vstack(rows).astype(float), 0.0)
 
         # Store the physical unit for clarity
         self._response_unit = (u.DN / u.s / u.pix) * u.cm**5
@@ -954,6 +955,18 @@ class XRTDEMIterative:
         result = minimize(
             self._residuals, params0, max_nfev=self._max_iterations
         )  # method='leastsq'
+        # ########### JOY-UPDATED_July16
+        # # 5. run minimizer
+        # # IDL MPFIT's MAXITER caps LM *iterations*; lmfit's max_nfev caps
+        # # *function evaluations*. Each LM iteration costs ~(n_spl + 1)
+        # # evaluations (one per parameter for the Jacobian, plus the step),
+        # # so scale max_nfev to make max_iterations behave like MAXITER.
+        # result = minimize(
+        #     self._residuals,
+        #     params0,
+        #     max_nfev=self._max_iterations * (self.n_spl + 1),
+        # )  # method='leastsq' (default), analogous to IDL MPFIT
+        # ###############
 
         # THIS is the critical part – use *result.params*, not params0 <<<
         dem_model = self._reconstruct_dem_from_knots(result.params)  # DEM_model(T)
