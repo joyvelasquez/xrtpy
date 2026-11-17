@@ -16,3 +16,7 @@ analysis_tools/*copy.py
 
 __pycache__/
 data/contribution_bands.csv
+data/xrtpy_base_dem_results/
+data/xrtpy_dem_base_chi_square_comparison_tables/
+data/idl_base_chisq.csv
+data/idl_mc_chisq_long.csv
