@@ -1,5 +1,5 @@
 """
-Poster 2x2 grid — DEMs + 1000 Monte Carlo (synthetic + IDL + XRTpy).
+2x2 grid — DEMs + 1000 Monte Carlo (synthetic + IDL + XRTpy).
 
 Give four DEM indices on the command line; they fill the grid in the order
 passed. Shared axes: one x-label along the bottom, one y-label up the side.
@@ -14,11 +14,11 @@ Loads per DEM:
     - XRTpy base: data/xrtpy_base_dem_results/*_base.npz
     - XRTpy MC:   data/xrtpy_monte_carlo_dem_results/*_MC1000.npz
 
-Saved to plots/idl_xrtpy_selected_dem_grids/poster_mc1000_{a}_{b}_{c}_{d}.png
+Saved to plots/idl_xrtpy_selected_dem_grids/mc1000_dem_grid_{a}_{b}_{c}_{d}.png
 
 Usage (from xrt_dem_validation/):
-    python poster_grid_mc1000.py 14 65 112 159
-    python poster_grid_mc1000.py 14 65 112 159 --out my_panel.png
+    python plot_mc1000_dem_grid.py 14 65 112 159
+    python plot_mc1000_dem_grid.py 14 65 112 159 --out my_panel.png
 """
 
 import argparse
@@ -165,7 +165,7 @@ def draw_panel(ax, dem_id, bands):
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
-    parser = argparse.ArgumentParser(description="Poster 2x2 MC1000 DEM grid")
+    parser = argparse.ArgumentParser(description="2x2 MC1000 DEM grid")
     parser.add_argument("dems", type=int, nargs=4,
                         help="Four DEM indices (top-left, top-right, "
                              "bottom-left, bottom-right).")
@@ -202,7 +202,7 @@ def main():
         out_png = PLOT_DIR / args.out
     else:
         a, b, c, d = args.dems
-        out_png = PLOT_DIR / f"poster_mc1000_{a}_{b}_{c}_{d}.png"
+        out_png = PLOT_DIR / f"mc1000_dem_grid_{a}_{b}_{c}_{d}.png"
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
     print(f"Saved: {out_png}")
