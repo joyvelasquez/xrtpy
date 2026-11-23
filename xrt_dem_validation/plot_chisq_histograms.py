@@ -5,9 +5,9 @@ Two overlaid figures (IDL orange vs XRTpy blue), log10(chi2) x-axis, with a
 dashed median line per solver:
 
   1. BASE      -- 162 IDL + 162 XRTpy base chi-square (one per DEM)
-                  plots/idl_xrtpy_chi_square_histograms/chisq_hist_base_v2.png
+                  plots/idl_xrtpy_chi_square_histograms/chisq_hist_base.png
   2. ALL MC    -- ~162,000 IDL + ~162,000 XRTpy MC chi-square (all draws)
-                  plots/idl_xrtpy_chi_square_histograms/chisq_hist_mc_all_v2.png
+                  plots/idl_xrtpy_chi_square_histograms/chisq_hist_mc_all.png
 
 Sources (each solver from its own clean file, no paired CSV):
   Python base : data/xrtpy_monte_carlo_dem_results/*_MC1000.npz  -> mc_chisq[0]  (fallback *_base.npz)
@@ -15,8 +15,8 @@ Sources (each solver from its own clean file, no paired CSV):
   IDL base    : data/idl_base_chisq.csv        (dem_id, chisq)
   IDL MC      : data/idl_mc_chisq_long.csv     (dem_id, mc_run, chisq); mc_run>=1
 
-Usage (from synthetic_dem_validation/):
-    python plot_chisq_histograms_v2.py
+Usage (from xrt_dem_validation/):
+    python plot_chisq_histograms.py
 """
 
 import csv
