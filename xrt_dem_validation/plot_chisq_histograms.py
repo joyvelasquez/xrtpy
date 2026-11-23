@@ -10,8 +10,8 @@ dashed median line per solver:
                   plots/histograms/chisq_hist_mc_all_v2.png
 
 Sources (each solver from its own clean file, no paired CSV):
-  Python base : data/xrtpy_monte_carlo_synthetic_dem_data/*_MC1000.npz  -> mc_chisq[0]  (fallback *_base.npz)
-  Python MC   : data/xrtpy_monte_carlo_synthetic_dem_data/*_MC1000.npz  -> mc_chisq[1:]
+  Python base : data/xrtpy_monte_carlo_dem_results/*_MC1000.npz  -> mc_chisq[0]  (fallback *_base.npz)
+  Python MC   : data/xrtpy_monte_carlo_dem_results/*_MC1000.npz  -> mc_chisq[1:]
   IDL base    : data/idl_base_chisq.csv        (dem_id, chisq)
   IDL MC      : data/idl_mc_chisq_long.csv     (dem_id, mc_run, chisq); mc_run>=1
 
@@ -28,7 +28,7 @@ import numpy as np
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).parent
-XRTPY_DIR = BASE_DIR / "data" / "xrtpy_monte_carlo_synthetic_dem_data"
+XRTPY_DIR = BASE_DIR / "data" / "xrtpy_monte_carlo_dem_results"
 IDL_BASE_CSV = BASE_DIR / "data" / "idl_base_chisq.csv"
 IDL_MC_CSV = BASE_DIR / "data" / "idl_mc_chisq_long.csv"
 PLOT_DIR = BASE_DIR / "plots" / "histograms"
@@ -85,6 +85,14 @@ def make_hist(idl_vals, py_vals, title, out_png, xlabel, subtitle=None):
     idl_vals = np.asarray(idl_vals, dtype=float)
     py_vals = np.asarray(py_vals, dtype=float)
 
+    # Drop inf/NaN so they can't break the bin edges; report how many.
+    n_bad_idl = int((~np.isfinite(idl_vals)).sum())
+    n_bad_py = int((~np.isfinite(py_vals)).sum())
+    idl_vals = idl_vals[np.isfinite(idl_vals)]
+    py_vals = py_vals[np.isfinite(py_vals)]
+    if n_bad_idl or n_bad_py:
+        print(f"  dropped non-finite chi-square: IDL {n_bad_idl}, XRTpy {n_bad_py}")
+        
     log_idl = np.log10(np.clip(idl_vals, CHI_FLOOR, None))
     log_py = np.log10(np.clip(py_vals, CHI_FLOOR, None))
 
