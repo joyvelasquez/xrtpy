@@ -11,13 +11,14 @@ Loads per DEM:
     - True:     data/synthetic_dems_data/DEM_{id}.txt
     - IDL base: data/IDL_synthetic_dem_data/*_base.sav
     - IDL MC:   data/IDL_monte_carlo_synthetic_dem_data/*_MC1000.sav
-    - XRTpy:    data/xrtpy_monte_carlo_synthetic_dem_data/*_MC1000.npz
+    - XRTpy base: data/xrtpy_base_dem_results/*_base.npz
+    - XRTpy MC:   data/xrtpy_monte_carlo_dem_results/*_MC1000.npz
 
-Saved to plots/poster/poster_mc1000_{a}_{b}_{c}_{d}.png
+Saved to plots/idl_xrtpy_selected_dem_grids/poster_mc1000_{a}_{b}_{c}_{d}.png
 
-Usage (from synthetic_dem_validation/):
-    python poster_grid_mc1000_v2.py 14 65 112 159
-    python poster_grid_mc1000_v2.py 14 65 112 159 --out my_panel.png
+Usage (from xrt_dem_validation/):
+    python poster_grid_mc1000.py 14 65 112 159
+    python poster_grid_mc1000.py 14 65 112 159 --out my_panel.png
 """
 
 import argparse
@@ -33,9 +34,10 @@ BASE_DIR = Path(__file__).parent
 IDL_BASE_DIR = BASE_DIR / "data" / "IDL_synthetic_dem_data"
 IDL_MC_DIR = BASE_DIR / "data" / "IDL_monte_carlo_synthetic_dem_data"
 TRUE_DEM_DIR = BASE_DIR / "data" / "synthetic_dems_data"
-XRTPY_DIR = BASE_DIR / "data" / "xrtpy_monte_carlo_synthetic_dem_data"
+XRTPY_BASE_DIR = BASE_DIR / "data" / "xrtpy_base_dem_results"
+XRTPY_MC_DIR = BASE_DIR / "data" / "xrtpy_monte_carlo_dem_results"
 BANDS_CSV = BASE_DIR / "data" / "contribution_bands.csv"
-PLOT_DIR = BASE_DIR / "plots" / "poster"
+PLOT_DIR = BASE_DIR / "plots" / "idl_xrtpy_selected_dem_grids"
 
 N_MC = 1000
 COLOR_TRUE = "red"
@@ -61,11 +63,6 @@ def _runs_by_T(dem, nT):
     if dem.shape[0] == nT:
         return dem.T
     raise ValueError(f"Cannot orient DEM array {dem.shape} with nT={nT}")
-
-
-def _decode(arr):
-    return [x.decode() if isinstance(x, bytes) else str(x)
-            for x in np.atleast_1d(arr)]
 
 
 def load_bands():
@@ -108,10 +105,16 @@ def load_idl_mc(dem_id, logT):
     return _runs_by_T(data["dem_out"], len(logT))[1:]
 
 
-def load_xrtpy(dem_id):
-    path = XRTPY_DIR / f"xrtpy_dem_idx{dem_id}_allfilters_MC{N_MC}.npz"
-    d = np.load(path, allow_pickle=True)
-    return d["logT"], d["mc_dem"][0], float(d["mc_chisq"][0]), d["mc_dem"][1:]
+def load_xrtpy_base(dem_id):
+    path = XRTPY_BASE_DIR / f"xrtpy_dem_idx{dem_id}_allfilters_base.npz"
+    d = np.load(path)
+    return d["dem"], float(d["chisq"])
+
+
+def load_xrtpy_mc(dem_id):
+    path = XRTPY_MC_DIR / f"xrtpy_dem_idx{dem_id}_allfilters_MC{N_MC}.npz"
+    d = np.load(path)
+    return d["mc_dem"][1:]
 
 
 def load_true_dem(dem_id):
@@ -126,7 +129,8 @@ def load_true_dem(dem_id):
 def draw_panel(ax, dem_id, bands):
     logT, idl_base, idl_chisq = load_idl_base(dem_id)
     idl_mc = load_idl_mc(dem_id, logT)
-    _, py_base, py_chisq, py_mc = load_xrtpy(dem_id)
+    py_base, py_chisq = load_xrtpy_base(dem_id)
+    py_mc = load_xrtpy_mc(dem_id)
 
     for lo, hi in contiguous_spans(bands.get(dem_id, [])):
         ax.axvspan(lo, hi, color=BAND_COLOR, alpha=BAND_ALPHA)
@@ -166,7 +170,7 @@ def main():
                         help="Four DEM indices (top-left, top-right, "
                              "bottom-left, bottom-right).")
     parser.add_argument("--out", type=str, default=None,
-                        help="Output filename (into plots/poster/).")
+                        help="Output filename (into plots/idl_xrtpy_selected_dem_grids/).")
     args = parser.parse_args()
 
     bands = load_bands()
