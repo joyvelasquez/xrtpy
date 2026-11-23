@@ -52,9 +52,7 @@ from scipy.io import readsav
 BASE_DIR = Path(__file__).parent
 
 IDL_BASE_DIR = BASE_DIR / "data" / "IDL_synthetic_dem_data"
-#TRUE_DEM_DIR = BASE_DIR / "data" / "synthetic_DEM_condition_data"
-TRUE_DEM_DIR = BASE_DIR / "data" / "synthetic_DEM_condition_data"
-
+TRUE_DEM_DIR = BASE_DIR / "data" / "synthetic_dems_data"
 
 XRTPY_BASE_DIR = (
     BASE_DIR
