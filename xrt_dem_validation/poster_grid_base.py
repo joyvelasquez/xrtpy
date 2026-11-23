@@ -10,13 +10,13 @@ Loads per DEM:
     - Band:    data/contribution_bands.csv (optional)
     - True:    data/synthetic_dems_data/DEM_{id}.txt
     - IDL:     data/IDL_synthetic_dem_data/*_base.sav
-    - XRTpy:   data/xrtpy_monte_carlo_synthetic_dem_data/*_MC1000.npz (row 0) or *_base.npz fallback
+    - XRTpy:   data/xrtpy_base_dem_results/*_base.npz
 
-Saved to plots/poster/poster_base_{a}_{b}_{c}_{d}.png
+Saved to plots/idl_xrtpy_selected_dem_grids/poster_base_{a}_{b}_{c}_{d}.png
 
-Usage (from synthetic_dem_validation/):
-    python poster_grid_base_v2.py 14 65 112 159
-    python poster_grid_base_v2.py 14 65 112 159 --out my_panel.png
+Usage (from xrt_dem_validation/):
+    python poster_grid_base.py 14 65 112 159
+    python poster_grid_base.py 14 65 112 159 --out my_panel.png
 """
 
 import argparse
@@ -31,9 +31,9 @@ from scipy.io import readsav
 BASE_DIR = Path(__file__).parent
 IDL_BASE_DIR = BASE_DIR / "data" / "IDL_synthetic_dem_data"
 TRUE_DEM_DIR = BASE_DIR / "data" / "synthetic_dems_data"
-XRTPY_DIR = BASE_DIR / "data" / "xrtpy_monte_carlo_synthetic_dem_data"
+XRTPY_BASE_DIR = BASE_DIR / "data" / "xrtpy_base_dem_results"
 BANDS_CSV = BASE_DIR / "data" / "contribution_bands.csv"
-PLOT_DIR = BASE_DIR / "plots" / "poster"
+PLOT_DIR = BASE_DIR / "plots" / "idl_xrtpy_selected_dem_grids"
 
 COLOR_TRUE = "red"
 COLOR_IDL = "orange"
@@ -99,15 +99,11 @@ def load_idl_base(dem_id):
 
 
 def load_xrtpy_base(dem_id):
-    mc = XRTPY_DIR / f"xrtpy_dem_idx{dem_id}_allfilters_MC1000.npz"
-    base = XRTPY_DIR / f"xrtpy_dem_idx{dem_id}_allfilters_base.npz"
-    if mc.exists():
-        d = np.load(mc, allow_pickle=True)
-        return d["logT"], d["mc_dem"][0], float(d["mc_chisq"][0])
-    if base.exists():
-        d = np.load(base, allow_pickle=True)
-        return d["logT"], d["dem"], float(d["chisq"])
-    raise FileNotFoundError(f"No XRTpy npz for DEM {dem_id}")
+    path = XRTPY_BASE_DIR / f"xrtpy_dem_idx{dem_id}_allfilters_base.npz"
+    if not path.exists():
+        raise FileNotFoundError(f"No XRTpy base npz for DEM {dem_id}: {path}")
+    d = np.load(path)
+    return d["logT"], d["dem"], float(d["chisq"])
 
 
 def load_true_dem(dem_id):
@@ -155,7 +151,7 @@ def main():
                         help="Four DEM indices (top-left, top-right, "
                              "bottom-left, bottom-right).")
     parser.add_argument("--out", type=str, default=None,
-                        help="Output filename (into plots/poster/).")
+                        help="Output filename (into plots/idl_xrtpy_selected_dem_grids/).")
     args = parser.parse_args()
 
     bands = load_bands()
