@@ -4,8 +4,10 @@ Compare synthetic truth, IDL base DEM results, and XRTpy base DEM results.
 The script performs two parts of the synthetic validation workflow:
 
 1. Compare the recovered base DEM from IDL and XRTpy against the known
-   synthetic truth for every DEM index available in both result sets.
-2. Compare the corresponding base chi-square values across the campaign.
+   synthetic truth for every DEM index available in both result sets
+   (one overlay plot per DEM).
+2. Write a table of the paired IDL/XRTpy base chi-square values.
+   (Chi-square histograms are made by plot_chisq_histograms.py.)
 
 The script automatically discovers DEM indices that have both an IDL base SAV
 file and an XRTpy base NPZ file, so partial result sets are handled without a
@@ -14,11 +16,11 @@ hardcoded index list.
 Inputs
 ------
 IDL base results:
-    data/all_IDL_synthetic_dem_data/
+    data/IDL_synthetic_dem_data/
     idl_synthetic_dem_idx{N}_allfilters_base.sav
 
 XRTpy base results:
-    data/output_data/xrtpy_base_dem_results/
+    data/xrtpy_base_dem_results/
     xrtpy_dem_idx{N}_allfilters_base.npz
 
 Synthetic truth DEMs:
@@ -28,13 +30,10 @@ Synthetic truth DEMs:
 Outputs
 -------
 Comparison table:
-    data/output_data/chi_square_comparison_tables/base_dem_comparison.csv
+    data/chi_square_comparison_tables/base_dem_comparison.csv
 
 Per-DEM overlays:
     plots/idl_xrtpy_synthetic_base_dem_comparison/per_dem_overlays/
-
-Chi-square summary plots:
-    plots/idl_xrtpy_synthetic_base_dem_comparison/chi_square_summary_plots/
 """
 
 from __future__ import annotations
@@ -54,15 +53,10 @@ from scipy.io import readsav
 
 BASE_DIR = Path(__file__).parent
 
-IDL_BASE_DIR = BASE_DIR / "data" / "all_IDL_synthetic_dem_data"
+IDL_BASE_DIR = BASE_DIR / "data" / "IDL_synthetic_dem_data"
 IDL_BASE_PATTERN = "idl_synthetic_dem_idx{n}_allfilters_base.sav"
 
-XRTPY_BASE_DIR = (
-    BASE_DIR
-    / "data"
-    / "output_data"
-    / "xrtpy_base_dem_results"
-)
+XRTPY_BASE_DIR = BASE_DIR / "data" / "xrtpy_base_dem_results"
 XRTPY_BASE_PATTERN = "xrtpy_dem_idx{n}_allfilters_base.npz"
 
 TRUE_DEM_DIR = BASE_DIR / "data" / "synthetic_dems_data"
@@ -71,7 +65,6 @@ TRUE_DEM_PATTERN = "DEM_{n}.txt"
 OUT_CSV = (
     BASE_DIR
     / "data"
-    / "output_data"
     / "chi_square_comparison_tables"
     / "base_dem_comparison.csv"
 )
@@ -83,17 +76,6 @@ PLOT_DIR = (
 )
 
 OVERLAY_DIR = PLOT_DIR / "per_dem_overlays"
-CHI_SQUARE_PLOT_DIR = PLOT_DIR / "chi_square_summary_plots"
-
-HIST_PNG = (
-    CHI_SQUARE_PLOT_DIR
-    / "base_chi_square_distribution_histogram.png"
-)
-
-SCATTER_PNG = (
-    CHI_SQUARE_PLOT_DIR
-    / "base_chi_square_idl_xrtpy_scatter.png"
-)
 
 DEM_FLOOR = 1e-99
 
@@ -288,127 +270,6 @@ def plot_base_overlay(
 
 
 # ============================================================
-# Step 3: Chi-square summary (histogram + paired scatter)
-# ============================================================
-
-def plot_chisq_histogram(
-    df: pd.DataFrame,
-    out_png: Path = HIST_PNG,
-) -> None:
-    """Plot the IDL and XRTpy base chi-square distributions."""
-    out_png.parent.mkdir(parents=True, exist_ok=True)
-
-    chisq_idl = df["chisq_idl"].to_numpy(dtype=float)
-    chisq_xrtpy = df["chisq_xrtpy"].to_numpy(dtype=float)
-
-    log_chisq_idl = np.log10(np.maximum(chisq_idl, 1e-10))
-    log_chisq_xrtpy = np.log10(np.maximum(chisq_xrtpy, 1e-10))
-
-    median_idl = np.median(chisq_idl)
-    median_xrtpy = np.median(chisq_xrtpy)
-
-    bins = np.linspace(
-        min(log_chisq_idl.min(), log_chisq_xrtpy.min()),
-        max(log_chisq_idl.max(), log_chisq_xrtpy.max()),
-        30,
-    )
-
-    fig, ax = plt.subplots(figsize=(9, 6))
-
-    ax.hist(
-        log_chisq_idl,
-        bins=bins,
-        alpha=0.6,
-        color="orange",
-        label="IDL",
-    )
-    ax.hist(
-        log_chisq_xrtpy,
-        bins=bins,
-        alpha=0.6,
-        color="steelblue",
-        label="XRTpy",
-    )
-
-    ax.axvline(
-        np.log10(max(median_idl, 1e-10)),
-        color="darkorange",
-        linestyle="--",
-        label=f"IDL median $\\chi^2$ = {median_idl:.3g}",
-    )
-    ax.axvline(
-        np.log10(max(median_xrtpy, 1e-10)),
-        color="navy",
-        linestyle="--",
-        label=f"XRTpy median $\\chi^2$ = {median_xrtpy:.3g}",
-    )
-
-    ax.set_title(
-        f"Base DEM $\\chi^2$ Distribution — "
-        f"{len(df)} Synthetic DEMs"
-    )
-    ax.set_xlabel(r"$\log_{10}(\chi^2)$  (base DEM)")
-    ax.set_ylabel("Number of DEMs")
-
-    ax.legend()
-    ax.grid(alpha=0.3)
-
-    fig.tight_layout()
-    fig.savefig(out_png, dpi=200)
-    plt.close(fig)
-
-
-
-def plot_chisq_scatter(
-    df: pd.DataFrame,
-    out_png: Path = SCATTER_PNG,
-) -> None:
-    """Plot paired IDL and XRTpy base chi-square values by IDL rank."""
-    out_png.parent.mkdir(parents=True, exist_ok=True)
-
-    ranked = (
-        df.sort_values("chisq_idl")
-        .reset_index(drop=True)
-    )
-    rank = np.arange(len(ranked))
-
-    fig, ax = plt.subplots(figsize=(11, 6))
-
-    ax.scatter(
-        rank,
-        ranked["chisq_idl"],
-        color="orange",
-        label="IDL",
-        s=25,
-        alpha=0.8,
-    )
-
-    ax.scatter(
-        rank,
-        ranked["chisq_xrtpy"],
-        color="steelblue",
-        label="XRTpy",
-        s=25,
-        alpha=0.8,
-    )
-
-    ax.set_yscale("log")
-    ax.set_xlabel(r"DEM rank (sorted by IDL $\chi^2$)")
-    ax.set_ylabel(r"$\chi^2$ (base DEM, log scale)")
-    ax.set_title(
-        f"Base DEM $\\chi^2$ per Case — "
-        f"{len(ranked)} Synthetic DEMs"
-    )
-
-    ax.legend()
-    ax.grid(alpha=0.3, which="both")
-
-    fig.tight_layout()
-    fig.savefig(out_png, dpi=200)
-    plt.close(fig)
-
-
-# ============================================================
 # Main
 # ============================================================
 def main():
@@ -445,14 +306,6 @@ def main():
         f"Saved {len(comparison)} overlay plots to: "
         f"{OVERLAY_DIR}"
     )
-
-    print("\nGenerating chi-square summary plots...")
-
-    plot_chisq_histogram(comparison)
-    plot_chisq_scatter(comparison)
-
-    print(f"Saved: {HIST_PNG}")
-    print(f"Saved: {SCATTER_PNG}")
 
     n_xrtpy_lower = (
         comparison["delta_chisq"] < 0
