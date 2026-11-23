@@ -25,6 +25,8 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).parent
@@ -92,7 +94,7 @@ def make_hist(idl_vals, py_vals, title, out_png, xlabel, subtitle=None):
     py_vals = py_vals[np.isfinite(py_vals)]
     if n_bad_idl or n_bad_py:
         print(f"  dropped non-finite chi-square: IDL {n_bad_idl}, XRTpy {n_bad_py}")
-        
+
     log_idl = np.log10(np.clip(idl_vals, CHI_FLOOR, None))
     log_py = np.log10(np.clip(py_vals, CHI_FLOOR, None))
 
@@ -137,6 +139,72 @@ def make_hist(idl_vals, py_vals, title, out_png, xlabel, subtitle=None):
           f"max={py_vals.max():.3g}")
 
 
+# ── Side-by-side panel (base | all-MC) ───────────────────────────────────────
+def draw_panel(ax, idl_vals, py_vals, title, xlabel):
+    idl_vals = np.asarray(idl_vals, dtype=float)
+    py_vals = np.asarray(py_vals, dtype=float)
+    idl_vals = idl_vals[np.isfinite(idl_vals)]
+    py_vals = py_vals[np.isfinite(py_vals)]
+
+    log_idl = np.log10(np.clip(idl_vals, CHI_FLOOR, None))
+    log_py = np.log10(np.clip(py_vals, CHI_FLOOR, None))
+
+    lo = np.floor(min(log_idl.min(), log_py.min()))
+    hi = np.ceil(max(log_idl.max(), log_py.max()))
+    bins = np.linspace(lo, hi, 60)
+
+    med_idl = float(np.median(idl_vals))
+    med_py = float(np.median(py_vals))
+
+    ax.hist(log_idl, bins=bins, color=COLOR_IDL, alpha=0.55)
+    ax.hist(log_py, bins=bins, color=COLOR_XRTPY, alpha=0.55)
+    ax.axvline(np.log10(max(med_idl, CHI_FLOOR)), color=COLOR_IDL,
+               linestyle="--", linewidth=2.0)
+    ax.axvline(np.log10(max(med_py, CHI_FLOOR)), color=COLOR_XRTPY,
+               linestyle="--", linewidth=2.0)
+
+    ax.text(0.97, 0.80,
+            f"IDL median χ² = {med_idl:.2f}\nXRTpy median χ² = {med_py:.2f}",
+            transform=ax.transAxes, ha="right", va="top", fontsize=10,
+            bbox=dict(boxstyle="round", fc="white", ec="0.7", alpha=0.85))
+
+    ax.set_title(title, fontsize=13)
+    ax.set_xlabel(xlabel, fontsize=12)
+    ax.set_ylabel("Count", fontsize=12)
+    ax.grid(visible=True, alpha=0.3)
+
+
+def make_panel(idl_b, py_base, idl_m, py_mc, out_png):
+    fig, (ax_left, ax_right) = plt.subplots(1, 2, figsize=(18, 6.5))
+
+    draw_panel(
+        ax_left, idl_b, py_base,
+        title=f"Base DEM χ²  —  {len(idl_b)} synthetic DEMs",
+        xlabel=r"log$_{10}$($\chi^2$)  (base DEM)",
+    )
+    draw_panel(
+        ax_right, idl_m, py_mc,
+        title=f"All-MC χ²  —  162 DEMs × 1000 MC  "
+              f"({len(idl_m):,} draws each)",
+        xlabel=r"log$_{10}$($\chi^2$)  (every MC draw)",
+    )
+
+    handles = [
+        Patch(fc=COLOR_IDL, alpha=0.55, label="IDL"),
+        Patch(fc=COLOR_XRTPY, alpha=0.55, label="XRTpy"),
+        Line2D([], [], color=COLOR_IDL, ls="--", lw=2, label="IDL median"),
+        Line2D([], [], color=COLOR_XRTPY, ls="--", lw=2, label="XRTpy median"),
+    ]
+    fig.legend(handles=handles, loc="upper center", ncol=4, fontsize=12,
+               frameon=True, bbox_to_anchor=(0.5, 1.0))
+    fig.tight_layout(rect=[0, 0, 1, 0.94])
+
+    PLOT_DIR.mkdir(parents=True, exist_ok=True)
+    fig.savefig(out_png, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+    print(f"  {out_png.name}")
+
+
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
     print("Loading XRTpy chi-square from npz...")
@@ -149,15 +217,19 @@ def main():
     make_hist(
         idl_b, py_base,
         title=f"Base DEM χ² Distribution — {len(idl_b)} synthetic DEMs",
-        out_png=PLOT_DIR / "chisq_hist_base_v2.png",
+        out_png=PLOT_DIR / "chisq_hist_base.png",
         xlabel=r"log$_{10}$($\chi^2$)  (base DEM)",
     )
     make_hist(
         idl_m, py_mc,
         title="All-MC χ² Distribution — 162 synthetic DEMs, 1000 MC each",
-        out_png=PLOT_DIR / "chisq_hist_mc_all_v2.png",
+        out_png=PLOT_DIR / "chisq_hist_mc_all.png",
         xlabel=r"log$_{10}$($\chi^2$)  (every MC draw)",
         subtitle=f"{len(idl_m):,} IDL draws vs {len(py_mc):,} XRTpy draws",
+    )
+    make_panel(
+        idl_b, py_base, idl_m, py_mc,
+        out_png=PLOT_DIR / "chisq_hist_panel_base_and_mc.png",
     )
     print("\nDone.")
 
