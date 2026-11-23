@@ -21,11 +21,11 @@ Synthetic truth:
     data/synthetic_dems_data/DEM_{id}.txt
 
 IDL base results:
-    data/all_IDL_synthetic_dem_data/
+    data/IDL_synthetic_dem_data/
     idl_synthetic_dem_idx{id}_allfilters_base.sav
 
 XRTpy base results:
-    data/output_data/xrtpy_base_dem_results/
+    data/xrtpy_base_dem_results/
     xrtpy_dem_idx{id}_allfilters_base.npz
 
 Outputs
@@ -33,10 +33,10 @@ Outputs
     plots/idl_xrtpy_synthetic_base_dem_comparison_with_contribution_bands/
     compare_base_dem_idx{id}_allfilters.png
 
-Usage from ``synthetic_dem_validation/``:
+Usage from ``xrt_dem_validation/``:
 
-    python compare_base_3way_banded.py --dem 137
-    python compare_base_3way_banded.py
+    python plot_base_dem_with_contribution_bands.py --dem 137
+    python plot_base_dem_with_contribution_bands.py
 """
 
 import argparse
@@ -54,11 +54,7 @@ BASE_DIR = Path(__file__).parent
 IDL_BASE_DIR = BASE_DIR / "data" / "IDL_synthetic_dem_data"
 TRUE_DEM_DIR = BASE_DIR / "data" / "synthetic_dems_data"
 
-XRTPY_BASE_DIR = (
-    BASE_DIR
-    / "data"
-    / "xrtpy_synthetic_dem_data" #/ "xrtpy_base_dem_results"
-)
+XRTPY_BASE_DIR = BASE_DIR / "data" / "xrtpy_base_dem_results"
 
 BANDS_CSV = BASE_DIR / "data" / "contribution_bands.csv"
 
