@@ -2,8 +2,6 @@
 plots/
 data/IDL_synthetic_dem_data/
 data/IDL_monte_carlo_synthetic_dem_data/
-data/xrtpy_synthetic_dem_data/
-data/xrtpy_monte_carlo_synthetic_dem_data/
 
 
 __pycache__/
