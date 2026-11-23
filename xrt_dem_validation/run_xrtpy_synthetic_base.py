@@ -3,7 +3,7 @@ Run XRTpy base DEM inversions for the 162-case synthetic validation campaign.
 
 Synthetic XRT intensities are read from:
 
-    data/synthetic_initial_condition_dems_data_with_bands/
+    data/synthetic_DEM_condition_data/
 
 The C-poly/Al-thick channel is excluded when the intensity files are read.
 
@@ -21,14 +21,14 @@ For each synthetic DEM case, this script:
 
 For a full campaign run, the script also rebuilds:
 
-    data/chi_square_comparison_tables/xrtpy_base_chisq.csv
+    data/xrtpy_dem_base_chi_square_comparison_tables/xrtpy_base_chisq.csv
 
 The chi-square table is generated from all saved base NPZ files on disk, so it
 remains complete when a campaign is resumed.
 
 Existing base NPZ files are skipped unless ``--overwrite`` is supplied.
 
-Usage from ``synthetic_dem_validation/``:
+Usage from ``xrt_dem_validation/``:
 
     python run_xrtpy_synthetic_base.py --dem 0
     python run_xrtpy_synthetic_base.py
@@ -173,7 +173,6 @@ def read_true_dem(dem_id: int):
         corresponding truth DEM file does not exist.
     """
     path = TRUE_DEM_DIR / f"DEM_{dem_id}.txt"
-    #path = TRUE_DEM_DIR / f"XRT_intensities_DEM_{dem_id}.txt"
 
     if not path.exists():
         return None
