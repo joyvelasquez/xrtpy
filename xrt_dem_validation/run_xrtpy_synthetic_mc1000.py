@@ -4,7 +4,7 @@ validation campaign.
 
 Synthetic XRT intensities are read from:
 
-    data/synthetic_initial_condition_dems_data_with_bands/
+    data/synthetic_DEM_condition_data/
 
 The C-poly/Al-thick channel is excluded when the intensity files are read.
 
@@ -14,7 +14,7 @@ For each synthetic DEM case, this script:
 - runs ``XRTDEMIterative`` with ``monte_carlo_runs=1000``;
 - saves the Monte Carlo inversion results to:
 
-      data/output_data/xrtpy_monte_carlo_dem_results/
+      data/xrtpy_monte_carlo_dem_results/
 
 - saves a comparison plot containing the synthetic truth, XRTpy base solution,
   and all Monte Carlo realizations to:
@@ -23,12 +23,12 @@ For each synthetic DEM case, this script:
 
 For a full campaign run, the script also rebuilds:
 
-    data/output_data/chi_square_comparison_tables/xrtpy_mc_chisq_long.csv
-    data/output_data/chi_square_comparison_tables/xrtpy_mc_chisq_summary.csv
+    data/xrtpy_monte_carlo_dem_base_chi_square_comparison_tables/xrtpy_mc_chisq_long.csv
+    data/xrtpy_monte_carlo_dem_base_chi_square_comparison_tables/xrtpy_mc_chisq_summary.csv
 
 Existing Monte Carlo NPZ files are skipped unless ``--overwrite`` is supplied.
 
-Usage from ``synthetic_dem_validation/``:
+Usage from ``xrt_dem_validation/``:
 
     python run_xrtpy_synthetic_mc1000.py --dem 0
     python run_xrtpy_synthetic_mc1000.py
