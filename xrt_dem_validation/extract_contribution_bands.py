@@ -16,7 +16,7 @@ Output: contribution_bands.csv, one row per DEM:
     dem_id, n_temps, temps
 `temps` = space-separated qualifying logT values (empty if none/absent).
 
-Usage (from synthetic_dem_validation/):
+Usage (from xrt_dem_validation/):
     python extract_contribution_bands.py
 """
 
