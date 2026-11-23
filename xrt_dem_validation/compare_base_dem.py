@@ -33,7 +33,7 @@ Comparison table:
     data/chi_square_comparison_tables/base_dem_comparison.csv
 
 Per-DEM overlays:
-    plots/idl_xrtpy_synthetic_base_dem_comparison/per_dem_overlays/
+    plots/idl_xrtpy_synthetic_base_dem_comparison/
 """
 
 from __future__ import annotations
@@ -75,7 +75,7 @@ PLOT_DIR = (
     / "idl_xrtpy_synthetic_base_dem_comparison"
 )
 
-OVERLAY_DIR = PLOT_DIR / "per_dem_overlays"
+OVERLAY_DIR = PLOT_DIR
 
 DEM_FLOOR = 1e-99
 
