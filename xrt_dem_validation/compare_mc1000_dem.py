@@ -18,11 +18,11 @@ For each DEM index available in both result sets, this script:
 Inputs
 ------
 IDL Monte Carlo results:
-    data/all_IDL_MC_synthetic_dem_data/
+    data/IDL_monte_carlo_synthetic_dem_data/
     idl_synthetic_dem_idx{N}_allfilters_MC1000.sav
 
 XRTpy Monte Carlo results:
-    data/output_data/xrtpy_monte_carlo_dem_results/
+    data/xrtpy_monte_carlo_dem_results/
     xrtpy_dem_idx{N}_allfilters_MC1000.npz
 
 Synthetic truth DEMs:
@@ -32,7 +32,7 @@ Synthetic truth DEMs:
 Outputs
 -------
 Chi-square tables:
-    data/output_data/chi_square_comparison_tables/
+    data/chi_square_comparison_tables/
     mc1000_chi_square_all_runs.csv
     mc1000_chi_square_summary.csv
 
@@ -57,26 +57,21 @@ import matplotlib.pyplot as plt
 from scipy.io import readsav
 
 # ============================================================
-# CONFIG -- adjust these paths to match your directory layout
+# Configuration
 # ============================================================
 
 BASE_DIR = Path(__file__).parent
 
-IDL_MC_DIR = BASE_DIR / "data" / "all_IDL_MC_synthetic_dem_data"
+IDL_MC_DIR = BASE_DIR / "data" / "IDL_monte_carlo_synthetic_dem_data"
 IDL_MC_PATTERN = "idl_synthetic_dem_idx{n}_allfilters_MC1000.sav"
 
-XRTPY_MC_DIR = BASE_DIR / "data" / "output_data" / "xrtpy_monte_carlo_dem_results"
+XRTPY_MC_DIR = BASE_DIR / "data" / "xrtpy_monte_carlo_dem_results"
 XRTPY_MC_PATTERN = "xrtpy_dem_idx{n}_allfilters_MC1000.npz"
 
 TRUE_DEM_DIR = BASE_DIR / "data" / "synthetic_dems_data"
 TRUE_DEM_PATTERN = "DEM_{n}.txt"
 
-CHI_SQUARE_TABLE_DIR = (
-    BASE_DIR
-    / "data"
-    / "output_data"
-    / "chi_square_comparison_tables"
-)
+CHI_SQUARE_TABLE_DIR = BASE_DIR / "data" / "chi_square_comparison_tables"
 
 OUT_LONG_CSV = (
     CHI_SQUARE_TABLE_DIR
@@ -525,12 +520,24 @@ def plot_all_runs_chisq_histogram(
     chisq_idl = long_df["chisq_idl"].to_numpy(dtype=float)
     chisq_xrtpy = long_df["chisq_xrtpy"].to_numpy(dtype=float)
 
+    # Drop inf/NaN so they can't break the bin edges; report how many.
+    n_bad_idl = int((~np.isfinite(chisq_idl)).sum())
+    n_bad_xrtpy = int((~np.isfinite(chisq_xrtpy)).sum())
+    chisq_idl = chisq_idl[np.isfinite(chisq_idl)]
+    chisq_xrtpy = chisq_xrtpy[np.isfinite(chisq_xrtpy)]
+    if n_bad_idl or n_bad_xrtpy:
+        print(
+            "  all-runs histogram: dropped non-finite chi-square: "
+            f"IDL {n_bad_idl}, XRTpy {n_bad_xrtpy}"
+        )
+
     log_chisq_idl = np.log10(
         np.maximum(chisq_idl, 1e-10)
     )
     log_chisq_xrtpy = np.log10(
         np.maximum(chisq_xrtpy, 1e-10)
     )
+    
 
     bins = np.linspace(
         min(
