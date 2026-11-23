@@ -23,19 +23,19 @@ Synthetic truth:
     data/synthetic_dems_data/DEM_{id}.txt
 
 IDL base results:
-    data/all_IDL_synthetic_dem_data/
+    data/IDL_synthetic_dem_data/
     idl_synthetic_dem_idx{id}_allfilters_base.sav
 
 IDL Monte Carlo results:
-    data/all_IDL_MC_synthetic_dem_data/
+    data/IDL_monte_carlo_synthetic_dem_data/
     idl_synthetic_dem_idx{id}_allfilters_MC1000.sav
 
 XRTpy base results:
-    data/output_data/xrtpy_base_dem_results/
+    data/xrtpy_base_dem_results/
     xrtpy_dem_idx{id}_allfilters_base.npz
 
 XRTpy Monte Carlo results:
-    data/output_data/xrtpy_monte_carlo_dem_results/
+    data/xrtpy_monte_carlo_dem_results/
     xrtpy_dem_idx{id}_allfilters_MC1000.npz
 
 Outputs
@@ -61,26 +61,13 @@ from scipy.io import readsav
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).parent
-IDL_BASE_DIR = BASE_DIR / "data" / "all_IDL_synthetic_dem_data"
-IDL_MC_DIR = BASE_DIR / "data" / "all_IDL_MC_synthetic_dem_data"
+IDL_BASE_DIR = BASE_DIR / "data" / "IDL_synthetic_dem_data"
+IDL_MC_DIR = BASE_DIR / "data" / "IDL_monte_carlo_synthetic_dem_data"
 TRUE_DEM_DIR = BASE_DIR / "data" / "synthetic_dems_data"
-XRTPY_DIR = BASE_DIR / "data" / "output_data" / "xrtpy_monte_carlo_dem_results"
+XRTPY_BASE_DIR = BASE_DIR / "data" / "xrtpy_base_dem_results"
+XRTPY_MC_DIR = BASE_DIR / "data" / "xrtpy_monte_carlo_dem_results"
 BANDS_CSV = BASE_DIR / "data" / "contribution_bands.csv"
 PLOT_DIR = BASE_DIR / "plots" / "idl_xrtpy_synthetic_monte_carlo_1000_run_comparison_with_contribution_bands"
-
-XRTPY_BASE_DIR = (
-    BASE_DIR
-    / "data"
-    / "output_data"
-    / "xrtpy_base_dem_results"
-)
-
-XRTPY_MC_DIR = (
-    BASE_DIR
-    / "data"
-    / "output_data"
-    / "xrtpy_monte_carlo_dem_results"
-)
 
 N_MC = 1000
 COLOR_TRUE = "red"
