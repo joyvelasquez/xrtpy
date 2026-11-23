@@ -59,11 +59,6 @@ def _runs_by_T(dem, nT):
     raise ValueError(f"Cannot orient DEM array {dem.shape} with nT={nT}")
 
 
-def _decode(arr):
-    return [x.decode() if isinstance(x, bytes) else str(x)
-            for x in np.atleast_1d(arr)]
-
-
 def load_bands():
     bands = {}
     if not BANDS_CSV.exists():
