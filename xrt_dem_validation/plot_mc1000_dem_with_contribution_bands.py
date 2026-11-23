@@ -43,10 +43,10 @@ Outputs
     plots/idl_xrtpy_synthetic_monte_carlo_1000_run_comparison_with_contribution_bands/
     compare_mc1000_dem_idx{id}_allfilters.png
 
-Usage from ``synthetic_dem_validation/``:
+Usage from ``xrt_dem_validation/``:
 
-    python compare_mc1000_3way_banded.py --dem 137
-    python compare_mc1000_3way_banded.py
+    python plot_mc1000_dem_with_contribution_bands.py --dem 137
+    python plot_mc1000_dem_with_contribution_bands.py
 """
 
 
