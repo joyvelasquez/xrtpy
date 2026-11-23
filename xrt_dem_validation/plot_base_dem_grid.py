@@ -1,5 +1,5 @@
 """
-Poster 2x2 grid — BASE DEMs (synthetic + IDL + XRTpy), no Monte Carlo.
+2x2 grid — BASE DEMs (synthetic + IDL + XRTpy), no Monte Carlo.
 
 Give four DEM indices on the command line; they fill the grid in the order
 you pass them (top-left, top-right, bottom-left, bottom-right). Shared axes:
@@ -12,11 +12,11 @@ Loads per DEM:
     - IDL:     data/IDL_synthetic_dem_data/*_base.sav
     - XRTpy:   data/xrtpy_base_dem_results/*_base.npz
 
-Saved to plots/idl_xrtpy_selected_dem_grids/poster_base_{a}_{b}_{c}_{d}.png
+Saved to plots/idl_xrtpy_selected_dem_grids/base_dem_grid_{a}_{b}_{c}_{d}.png
 
 Usage (from xrt_dem_validation/):
-    python poster_grid_base.py 14 65 112 159
-    python poster_grid_base.py 14 65 112 159 --out my_panel.png
+    python plot_base_dem_grid.py 14 65 112 159
+    python plot_base_dem_grid.py 14 65 112 159 --out my_panel.png
 """
 
 import argparse
@@ -146,7 +146,7 @@ def draw_panel(ax, dem_id, bands):
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
-    parser = argparse.ArgumentParser(description="Poster 2x2 base DEM grid")
+    parser = argparse.ArgumentParser(description="2x2 base DEM grid")
     parser.add_argument("dems", type=int, nargs=4,
                         help="Four DEM indices (top-left, top-right, "
                              "bottom-left, bottom-right).")
@@ -184,7 +184,7 @@ def main():
         out_png = PLOT_DIR / args.out
     else:
         a, b, c, d = args.dems
-        out_png = PLOT_DIR / f"poster_base_{a}_{b}_{c}_{d}.png"
+        out_png = PLOT_DIR / f"base_dem_grid_{a}_{b}_{c}_{d}.png"
     fig.savefig(out_png, dpi=200)
     plt.close(fig)
     print(f"Saved: {out_png}")
