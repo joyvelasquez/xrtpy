@@ -5,9 +5,9 @@ Two overlaid figures (IDL orange vs XRTpy blue), log10(chi2) x-axis, with a
 dashed median line per solver:
 
   1. BASE      -- 162 IDL + 162 XRTpy base chi-square (one per DEM)
-                  plots/histograms/chisq_hist_base_v2.png
+                  plots/idl_xrtpy_chi_square_histograms/chisq_hist_base_v2.png
   2. ALL MC    -- ~162,000 IDL + ~162,000 XRTpy MC chi-square (all draws)
-                  plots/histograms/chisq_hist_mc_all_v2.png
+                  plots/idl_xrtpy_chi_square_histograms/chisq_hist_mc_all_v2.png
 
 Sources (each solver from its own clean file, no paired CSV):
   Python base : data/xrtpy_monte_carlo_dem_results/*_MC1000.npz  -> mc_chisq[0]  (fallback *_base.npz)
@@ -33,7 +33,7 @@ BASE_DIR = Path(__file__).parent
 XRTPY_DIR = BASE_DIR / "data" / "xrtpy_monte_carlo_dem_results"
 IDL_BASE_CSV = BASE_DIR / "data" / "idl_base_chisq.csv"
 IDL_MC_CSV = BASE_DIR / "data" / "idl_mc_chisq_long.csv"
-PLOT_DIR = BASE_DIR / "plots" / "histograms"
+PLOT_DIR = BASE_DIR / "plots" / "idl_xrtpy_chi_square_histograms"
 
 N_MC = 1000
 COLOR_IDL = "orange"
