@@ -109,6 +109,7 @@ ALLRUNS_HIST_PNG = (
     / "mc1000_all_runs_chi_square_distribution_histogram.png"
 )
 
+N_MC = 1000  # Monte Carlo runs per DEM (matches the MC1000 file names)
 DEM_FLOOR = 1e-99
 N_OVERLAY_MAX_CURVES = 1000  # set lower (e.g. 200) to speed up plotting if desired
 
@@ -494,7 +495,7 @@ def plot_median_chisq_histogram(
     ax.set_title(
         f"Median MC $\\chi^2$ Distribution — "
         f"{len(summary_df)} Synthetic DEMs "
-        f"({N_OVERLAY_MAX_CURVES} MC each)"
+        f"({N_MC} MC each)"
     )
 
     ax.set_xlabel(
