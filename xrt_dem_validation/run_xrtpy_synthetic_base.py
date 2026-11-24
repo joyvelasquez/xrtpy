@@ -48,7 +48,6 @@ import numpy as np
 from xrtpy.response.tools.multi_filter_response import generate_temperature_responses
 from xrtpy.xrt_dem_iterative.dem_solver import XRTDEMIterative
 
-
 # ── Configuration ─────────────────────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent
 

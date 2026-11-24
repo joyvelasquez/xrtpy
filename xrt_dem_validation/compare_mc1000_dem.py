@@ -47,12 +47,12 @@ Chi-square summary plots:
 
 from __future__ import annotations
 
-from pathlib import Path
 import re
+from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from scipy.io import readsav
 
 # ============================================================

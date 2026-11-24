@@ -48,7 +48,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.io import readsav
 
-
 BASE_DIR = Path(__file__).parent
 
 IDL_BASE_DIR = BASE_DIR / "data" / "IDL_synthetic_dem_data"
