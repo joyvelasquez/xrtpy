@@ -62,18 +62,9 @@ XRTPY_BASE_PATTERN = "xrtpy_dem_idx{n}_allfilters_base.npz"
 TRUE_DEM_DIR = BASE_DIR / "data" / "synthetic_dems_data"
 TRUE_DEM_PATTERN = "DEM_{n}.txt"
 
-OUT_CSV = (
-    BASE_DIR
-    / "data"
-    / "chi_square_comparison_tables"
-    / "base_dem_comparison.csv"
-)
+OUT_CSV = BASE_DIR / "data" / "chi_square_comparison_tables" / "base_dem_comparison.csv"
 
-PLOT_DIR = (
-    BASE_DIR
-    / "plots"
-    / "idl_xrtpy_synthetic_base_dem_comparison"
-)
+PLOT_DIR = BASE_DIR / "plots" / "idl_xrtpy_synthetic_base_dem_comparison"
 
 OVERLAY_DIR = PLOT_DIR
 
@@ -82,6 +73,7 @@ DEM_FLOOR = 1e-99
 # ============================================================
 # Discovery
 # ============================================================
+
 
 def _extract_index(filename: str, pattern: str) -> int | None:
     """Turn a glob-matched filename into its DEM index using `pattern`."""
@@ -126,6 +118,7 @@ def discover_common_indices() -> list[int]:
 # ============================================================
 # Loaders
 # ============================================================
+
 
 def load_idl_base(idx: int) -> dict:
     path = IDL_BASE_DIR / IDL_BASE_PATTERN.format(n=idx)
@@ -187,10 +180,7 @@ def build_comparison_table(indices: list[int]) -> pd.DataFrame:
             xrtpy["logT"],
             atol=1e-8,
         ):
-            print(
-                f"  [warn] DEM {dem_id}: "
-                "IDL and XRTpy logT grids differ."
-            )
+            print(f"  [warn] DEM {dem_id}: IDL and XRTpy logT grids differ.")
 
         rows.append(
             {
@@ -201,12 +191,7 @@ def build_comparison_table(indices: list[int]) -> pd.DataFrame:
             }
         )
 
-    return (
-        pd.DataFrame(rows)
-        .sort_values("dem_id")
-        .reset_index(drop=True)
-    )
-
+    return pd.DataFrame(rows).sort_values("dem_id").reset_index(drop=True)
 
 
 def plot_base_overlay(
@@ -302,29 +287,15 @@ def main():
     for dem_id in comparison["dem_id"]:
         plot_base_overlay(int(dem_id))
 
-    print(
-        f"Saved {len(comparison)} overlay plots to: "
-        f"{OVERLAY_DIR}"
-    )
+    print(f"Saved {len(comparison)} overlay plots to: {OVERLAY_DIR}")
 
-    n_xrtpy_lower = (
-        comparison["delta_chisq"] < 0
-    ).sum()
+    n_xrtpy_lower = (comparison["delta_chisq"] < 0).sum()
 
     print("\nSummary:")
     print(f"  N = {len(comparison)}")
-    print(
-        "  IDL   median chisq = "
-        f"{comparison['chisq_idl'].median():.4g}"
-    )
-    print(
-        "  XRTpy median chisq = "
-        f"{comparison['chisq_xrtpy'].median():.4g}"
-    )
-    print(
-        "  Cases where XRTpy chisq < IDL chisq: "
-        f"{n_xrtpy_lower} / {len(comparison)}"
-    )
+    print(f"  IDL   median chisq = {comparison['chisq_idl'].median():.4g}")
+    print(f"  XRTpy median chisq = {comparison['chisq_xrtpy'].median():.4g}")
+    print(f"  Cases where XRTpy chisq < IDL chisq: {n_xrtpy_lower} / {len(comparison)}")
 
 
 if __name__ == "__main__":

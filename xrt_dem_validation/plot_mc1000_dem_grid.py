@@ -83,7 +83,8 @@ def contiguous_spans(temps, step=GRID_STEP):
     spans, start, prev = [], t[0], t[0]
     for x in t[1:]:
         if x - prev > step * 1.5:
-            spans.append((start, prev)); start = x
+            spans.append((start, prev))
+            start = x
         prev = x
     spans.append((start, prev))
     half = step / 2.0
@@ -136,41 +137,69 @@ def draw_panel(ax, dem_id, bands):
         ax.axvspan(lo, hi, color=BAND_COLOR, alpha=BAND_ALPHA)
 
     for row in idl_mc:
-        ax.step(logT, _log10_dem(row), where="mid",
-                color=COLOR_IDL, alpha=ALPHA_MC, linewidth=0.7)
+        ax.step(
+            logT,
+            _log10_dem(row),
+            where="mid",
+            color=COLOR_IDL,
+            alpha=ALPHA_MC,
+            linewidth=0.7,
+        )
     for row in py_mc:
-        ax.step(logT, _log10_dem(row), where="mid",
-                color=COLOR_XRTPY, alpha=ALPHA_MC, linewidth=0.7)
+        ax.step(
+            logT,
+            _log10_dem(row),
+            where="mid",
+            color=COLOR_XRTPY,
+            alpha=ALPHA_MC,
+            linewidth=0.7,
+        )
 
     true_dem = load_true_dem(dem_id)
     if true_dem is not None:
-        ax.step(true_dem[0], true_dem[1], where="mid",
-                color=COLOR_TRUE, linewidth=2.2)
-    ax.step(logT, _log10_dem(idl_base), where="mid",
-            color=COLOR_IDL, linewidth=2.2)
-    ax.step(logT, _log10_dem(py_base), where="mid",
-            color=COLOR_XRTPY, linewidth=2.2, linestyle="--")
+        ax.step(true_dem[0], true_dem[1], where="mid", color=COLOR_TRUE, linewidth=2.2)
+    ax.step(logT, _log10_dem(idl_base), where="mid", color=COLOR_IDL, linewidth=2.2)
+    ax.step(
+        logT,
+        _log10_dem(py_base),
+        where="mid",
+        color=COLOR_XRTPY,
+        linewidth=2.2,
+        linestyle="--",
+    )
 
     ax.set_xlim(*XLIM)
     ax.set_ylim(*YLIM)
     ax.grid(visible=True, alpha=0.3)
 
-    txt = (f"DEM {dem_id}\n"
-           f"IDL χ²={idl_chisq:.2f}\n"
-           f"XRTpy χ²={py_chisq:.2f}")
-    ax.text(0.97, 0.95, txt, transform=ax.transAxes, ha="right", va="top",
-            fontsize=9, bbox=dict(boxstyle="round", fc="white", ec="0.7",
-                                  alpha=0.85))
+    txt = f"DEM {dem_id}\nIDL χ²={idl_chisq:.2f}\nXRTpy χ²={py_chisq:.2f}"
+    ax.text(
+        0.97,
+        0.95,
+        txt,
+        transform=ax.transAxes,
+        ha="right",
+        va="top",
+        fontsize=9,
+        bbox=dict(boxstyle="round", fc="white", ec="0.7", alpha=0.85),
+    )
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 def main():
     parser = argparse.ArgumentParser(description="2x2 MC1000 DEM grid")
-    parser.add_argument("dems", type=int, nargs=4,
-                        help="Four DEM indices (top-left, top-right, "
-                             "bottom-left, bottom-right).")
-    parser.add_argument("--out", type=str, default=None,
-                        help="Output filename (into plots/idl_xrtpy_selected_dem_grids/).")
+    parser.add_argument(
+        "dems",
+        type=int,
+        nargs=4,
+        help="Four DEM indices (top-left, top-right, bottom-left, bottom-right).",
+    )
+    parser.add_argument(
+        "--out",
+        type=str,
+        default=None,
+        help="Output filename (into plots/idl_xrtpy_selected_dem_grids/).",
+    )
     args = parser.parse_args()
 
     bands = load_bands()
@@ -187,13 +216,19 @@ def main():
     handles = [
         plt.Line2D([], [], color=COLOR_TRUE, lw=2.2, label="Synthetic DEM"),
         plt.Line2D([], [], color=COLOR_IDL, lw=2.2, label="IDL base + MC"),
-        plt.Line2D([], [], color=COLOR_XRTPY, lw=2.2, ls="--",
-                   label="XRTpy base + MC"),
-        plt.Rectangle((0, 0), 1, 1, fc=BAND_COLOR, alpha=BAND_ALPHA,
-                      label=">2% contribution"),
+        plt.Line2D([], [], color=COLOR_XRTPY, lw=2.2, ls="--", label="XRTpy base + MC"),
+        plt.Rectangle(
+            (0, 0), 1, 1, fc=BAND_COLOR, alpha=BAND_ALPHA, label=">2% contribution"
+        ),
     ]
-    fig.legend(handles=handles, loc="upper center", ncol=4, fontsize=11,
-               frameon=True, bbox_to_anchor=(0.5, 1.0))
+    fig.legend(
+        handles=handles,
+        loc="upper center",
+        ncol=4,
+        fontsize=11,
+        frameon=True,
+        bbox_to_anchor=(0.5, 1.0),
+    )
 
     fig.tight_layout(rect=[0, 0, 1, 0.955])
 

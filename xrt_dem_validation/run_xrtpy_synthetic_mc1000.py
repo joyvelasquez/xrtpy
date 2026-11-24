@@ -35,7 +35,6 @@ Usage from ``xrt_dem_validation/``:
     python run_xrtpy_synthetic_mc1000.py --overwrite
 """
 
-
 import argparse
 import csv
 import re
@@ -61,9 +60,7 @@ OUT_DIR = BASE_DIR / "data" / "xrtpy_monte_carlo_dem_results"
 PLOT_DIR = BASE_DIR / "plots" / "xrtpy_monte_carlo_1000_run_dem_vs_synthetic_truth"
 
 CHISQ_DIR = (
-    BASE_DIR
-    / "data"
-    / "xrtpy_monte_carlo_dem_base_chi_square_comparison_tables"
+    BASE_DIR / "data" / "xrtpy_monte_carlo_dem_base_chi_square_comparison_tables"
 )
 
 OBSERVATION_DATE = "2008-10-10T00:00:00"
@@ -251,9 +248,7 @@ def plot_one_dem(solver, dem_id, filters, intensities, uncertainties):
     fig, ax = plt.subplots(figsize=(11, 7))
 
     for mc_index in range(1, n_mc + 1):
-        log_mc_dem = np.log10(
-            np.clip(solver.mc_dem[mc_index], 1e-40, None)
-        )
+        log_mc_dem = np.log10(np.clip(solver.mc_dem[mc_index], 1e-40, None))
 
         ax.step(
             log_temperature,
@@ -307,9 +302,7 @@ def plot_one_dem(solver, dem_id, filters, intensities, uncertainties):
 
     filters_per_line = 4
     filter_label = "\n".join(
-        ",   ".join(
-            filter_entries[start : start + filters_per_line]
-        )
+        ",   ".join(filter_entries[start : start + filters_per_line])
         for start in range(0, len(filter_entries), filters_per_line)
     )
 
@@ -331,10 +324,7 @@ def plot_one_dem(solver, dem_id, filters, intensities, uncertainties):
 
     fig.tight_layout(rect=[0, 0, 1, 0.87])
 
-    out_png = (
-        PLOT_DIR
-        / f"xrtpy_synthetic_dem_idx{dem_id}_allfilters_MC{n_mc}.png"
-    )
+    out_png = PLOT_DIR / f"xrtpy_synthetic_dem_idx{dem_id}_allfilters_MC{n_mc}.png"
 
     fig.savefig(out_png, dpi=150)
     plt.close(fig)
@@ -364,9 +354,7 @@ def write_mc_chisq_csvs():
         long_writer = csv.writer(long_file)
         summary_writer = csv.writer(summary_file)
 
-        long_writer.writerow(
-            ["dem_id", "mc_run", "chisq"]
-        )
+        long_writer.writerow(["dem_id", "mc_run", "chisq"])
 
         summary_writer.writerow(
             [
@@ -389,9 +377,7 @@ def write_mc_chisq_csvs():
             # Index 0 is the base solution; indices 1..N_MC are
             # the Monte Carlo realizations.
             for run_index, value in enumerate(chisq):
-                long_writer.writerow(
-                    [dem_id, run_index, f"{value:.6f}"]
-                )
+                long_writer.writerow([dem_id, run_index, f"{value:.6f}"])
 
             mc_chisq = chisq[1:]
 
@@ -406,13 +392,9 @@ def write_mc_chisq_csvs():
                 ]
             )
 
-    print(
-        f"\nChi-square CSVs "
-        f"({len(npz_files)} DEMs, {total_rows} rows):"
-    )
+    print(f"\nChi-square CSVs ({len(npz_files)} DEMs, {total_rows} rows):")
     print(f"  {long_path}")
     print(f"  {summary_path}")
-
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -421,9 +403,7 @@ def _dem_id_from_path(path: Path) -> int:
     match = re.search(r"DEM_(\d+)\.txt$", path.name)
 
     if match is None:
-        raise ValueError(
-            f"Could not extract DEM index from filename: {path.name}"
-        )
+        raise ValueError(f"Could not extract DEM index from filename: {path.name}")
 
     return int(match.group(1))
 
@@ -432,8 +412,7 @@ def main():
     """Run one or all synthetic DEM inversions with Monte Carlo sampling."""
     parser = argparse.ArgumentParser(
         description=(
-            "Run XRTpy synthetic DEM inversions with "
-            f"{N_MC} Monte Carlo realizations."
+            f"Run XRTpy synthetic DEM inversions with {N_MC} Monte Carlo realizations."
         )
     )
     parser.add_argument(
@@ -460,36 +439,24 @@ def main():
         )
 
     if args.dem is not None:
-        txt_files = [
-            path
-            for path in txt_files
-            if _dem_id_from_path(path) == args.dem
-        ]
+        txt_files = [path for path in txt_files if _dem_id_from_path(path) == args.dem]
 
         if not txt_files:
-            raise FileNotFoundError(
-                f"No intensity file found for DEM index {args.dem}"
-            )
+            raise FileNotFoundError(f"No intensity file found for DEM index {args.dem}")
 
     todo = []
     skipped = 0
 
     for txt_path in txt_files:
         dem_id = _dem_id_from_path(txt_path)
-        out_npz = (
-            OUT_DIR
-            / f"xrtpy_dem_idx{dem_id}_allfilters_MC{N_MC}.npz"
-        )
+        out_npz = OUT_DIR / f"xrtpy_dem_idx{dem_id}_allfilters_MC{N_MC}.npz"
 
         if out_npz.exists() and not args.overwrite:
             skipped += 1
         else:
             todo.append(txt_path)
 
-    print(
-        f"Found {len(txt_files)} file(s); "
-        f"{skipped} done, {len(todo)} to solve."
-    )
+    print(f"Found {len(txt_files)} file(s); {skipped} done, {len(todo)} to solve.")
 
     if not todo:
         print("Nothing to do. Use --overwrite to re-solve.")
@@ -510,9 +477,7 @@ def main():
 
         elapsed_seconds = time.time() - start_time
         average_seconds_per_dem = elapsed_seconds / index
-        remaining_seconds = (
-            average_seconds_per_dem * (len(todo) - index)
-        )
+        remaining_seconds = average_seconds_per_dem * (len(todo) - index)
 
         print(
             f"[{index:3d}/{len(todo)}] "
@@ -527,6 +492,7 @@ def main():
         write_mc_chisq_csvs()
 
     print("\nDone.")
+
 
 if __name__ == "__main__":
     main()

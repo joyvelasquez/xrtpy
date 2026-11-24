@@ -138,15 +138,10 @@ def load_idl_base(dem_id):
 
 def load_xrtpy_base(dem_id):
     """Load the XRTpy base DEM result for one synthetic case."""
-    path = (
-        XRTPY_BASE_DIR
-        / f"xrtpy_dem_idx{dem_id}_allfilters_base.npz"
-    )
+    path = XRTPY_BASE_DIR / f"xrtpy_dem_idx{dem_id}_allfilters_base.npz"
 
     if not path.exists():
-        raise FileNotFoundError(
-            f"No XRTpy base NPZ for DEM {dem_id}: {path}"
-        )
+        raise FileNotFoundError(f"No XRTpy base NPZ for DEM {dem_id}: {path}")
 
     with np.load(path) as result:
         log_temperature = np.asarray(result["logT"], dtype=float)
@@ -154,6 +149,7 @@ def load_xrtpy_base(dem_id):
         chisq = float(result["chisq"])
 
     return log_temperature, dem, chisq
+
 
 def load_true_dem(dem_id):
     """Load the synthetic truth DEM for one case."""
@@ -168,7 +164,6 @@ def load_true_dem(dem_id):
     log_dem = _log10_dem(data[:, 1])
 
     return log_temperature, log_dem
-
 
 
 # ── Plot ──────────────────────────────────────────────────────────────────────
@@ -194,17 +189,13 @@ def plot_one_dem(dem_id, bands):
         xrtpy_log_temperature,
         atol=1e-6,
     ):
-        raise ValueError(
-            f"IDL and XRTpy logT grids differ for DEM {dem_id}."
-        )
+        raise ValueError(f"IDL and XRTpy logT grids differ for DEM {dem_id}.")
 
     log_temperature = xrtpy_log_temperature
 
     fig, ax = plt.subplots(figsize=(11, 7))
 
-    spans = contiguous_spans(
-        bands.get(dem_id, [])
-    )
+    spans = contiguous_spans(bands.get(dem_id, []))
 
     for span_index, (lower, upper) in enumerate(spans):
         ax.axvspan(
@@ -268,9 +259,7 @@ def plot_one_dem(dem_id, bands):
 
     filters_per_line = 4
     filter_label = "\n".join(
-        ",   ".join(
-            filter_entries[start : start + filters_per_line]
-        )
+        ",   ".join(filter_entries[start : start + filters_per_line])
         for start in range(0, len(filter_entries), filters_per_line)
     )
 
@@ -294,16 +283,12 @@ def plot_one_dem(dem_id, bands):
 
     PLOT_DIR.mkdir(parents=True, exist_ok=True)
 
-    out_png = (
-        PLOT_DIR
-        / f"compare_base_dem_idx{dem_id}_allfilters.png"
-    )
+    out_png = PLOT_DIR / f"compare_base_dem_idx{dem_id}_allfilters.png"
 
     fig.savefig(out_png, dpi=150)
     plt.close(fig)
 
     return idl_chisq, xrtpy_chisq, len(spans)
-
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -312,9 +297,7 @@ def _dem_id_from_path(path: Path) -> int:
     match = re.search(r"idx(\d+)_", path.name)
 
     if match is None:
-        raise ValueError(
-            f"Could not extract DEM index from filename: {path.name}"
-        )
+        raise ValueError(f"Could not extract DEM index from filename: {path.name}")
 
     return int(match.group(1))
 
@@ -338,27 +321,18 @@ def main():
     bands = load_bands()
 
     sav_files = sorted(
-        IDL_BASE_DIR.glob(
-            "idl_synthetic_dem_idx*_allfilters_base.sav"
-        ),
+        IDL_BASE_DIR.glob("idl_synthetic_dem_idx*_allfilters_base.sav"),
         key=_dem_id_from_path,
     )
 
     if not sav_files:
-        raise FileNotFoundError(
-            f"No IDL base SAV files found in {IDL_BASE_DIR}"
-        )
+        raise FileNotFoundError(f"No IDL base SAV files found in {IDL_BASE_DIR}")
 
-    dem_ids = [
-        _dem_id_from_path(path)
-        for path in sav_files
-    ]
+    dem_ids = [_dem_id_from_path(path) for path in sav_files]
 
     if args.dem is not None:
         if args.dem not in dem_ids:
-            raise FileNotFoundError(
-                f"No IDL base SAV file found for DEM {args.dem}"
-            )
+            raise FileNotFoundError(f"No IDL base SAV file found for DEM {args.dem}")
 
         dem_ids = [args.dem]
 

@@ -59,7 +59,7 @@ def extract_temps(txt_path: Path):
             else:
                 tail = re.sub(r"^[^0-9]*\d+\s*%?\s*[^0-9.+-]*", "", stripped)
             temps = [float(x) for x in FLOAT_RE.findall(tail)]
-            in_contrib = True          # continuation lines may follow
+            in_contrib = True  # continuation lines may follow
             continue
 
         # Absorb numbers-only continuation lines; stop at Filter/any letters
@@ -105,16 +105,20 @@ def main():
             w.writerow([dem_id, len(temps), temps_str])
 
     print(f"Wrote {OUT_CSV}")
-    print(f"{len(rows)} DEMs, {n_with} with a contribution line, "
-          f"{len(rows) - n_with} without.")
+    print(
+        f"{len(rows)} DEMs, {n_with} with a contribution line, "
+        f"{len(rows) - n_with} without."
+    )
 
     print("\nExamples (incl. known multi-line cases):")
     show = {r[0]: r[1] for r in rows}
     for dem_id in [0, 99, 101, 137, 143]:
         if dem_id in show:
             t = show[dem_id]
-            print(f"  DEM {dem_id}: {len(t)} temps -> "
-                  f"{t[:8]}{' ...' if len(t) > 8 else ''}")
+            print(
+                f"  DEM {dem_id}: {len(t)} temps -> "
+                f"{t[:8]}{' ...' if len(t) > 8 else ''}"
+            )
 
 
 if __name__ == "__main__":
