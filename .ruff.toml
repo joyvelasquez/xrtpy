@@ -77,3 +77,6 @@ ignore = [
 "examples/*" = [
   "INP001",  # Implicit-namespace-package. The examples are not a package.
 ]
+"xrt_dem_validation/*" = [
+  "INP001",  # Implicit-namespace-package. Standalone validation scripts, not a package.
+]
