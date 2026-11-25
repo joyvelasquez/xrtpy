@@ -114,3 +114,104 @@ def test_sigma_all_runs_non_finite_raises():
 def test_sigma_needs_2d_input():
     with pytest.raises(ValueError, match="must be 2-D"):
         sigma_from_mc(np.ones(5))
+
+
+from delta_metric import (
+    compute_delta,
+    contribution_band,
+    contribution_fractions,
+    sigma_from_mc,
+)
+
+# ---------------------------------------------------------------------------
+# contribution_fractions / contribution_band
+# ---------------------------------------------------------------------------
+
+
+def test_fractions_by_hand():
+    # One filter, K = [1, 2, 1], DEM = [1, 1, 2]
+    # signal = [1, 2, 2], total = 5 -> [0.2, 0.4, 0.4]
+    k = np.array([[1.0, 2.0, 1.0]])
+    dem = np.array([1.0, 1.0, 2.0])
+
+    frac = contribution_fractions(dem, k)
+
+    np.testing.assert_allclose(frac, [[0.2, 0.4, 0.4]])
+
+
+def test_fraction_rows_sum_to_one():
+    rng = np.random.default_rng(1)
+    k = rng.uniform(0.0, 1.0, size=(5, 26))
+    dem = rng.uniform(1e20, 1e22, size=26)
+
+    frac = contribution_fractions(dem, k)
+
+    np.testing.assert_allclose(frac.sum(axis=1), np.ones(5))
+
+
+def test_filter_with_zero_signal_gets_zero_row():
+    k = np.array([[1.0, 1.0, 1.0], [0.0, 0.0, 0.0]])
+    dem = np.array([1.0, 1.0, 1.0])
+
+    frac = contribution_fractions(dem, k)
+
+    np.testing.assert_allclose(frac[1], [0.0, 0.0, 0.0])
+
+
+def test_fractions_shape_mismatch_raises():
+    with pytest.raises(ValueError, match="Shape mismatch"):
+        contribution_fractions(np.ones(3), np.ones((2, 4)))
+
+
+def test_fractions_non_finite_dem_raises():
+    with pytest.raises(ValueError, match="non-finite"):
+        contribution_fractions(np.array([1.0, np.inf, 1.0]), np.ones((1, 3)))
+
+
+def test_band_includes_exactly_two_percent():
+    # signal = [2, 98, 0] of 100 -> fractions [0.02, 0.98, 0]
+    k = np.ones((1, 3))
+    dem = np.array([2.0, 98.0, 0.0])
+
+    band = contribution_band(dem, k)
+
+    np.testing.assert_array_equal(band, [True, True, False])
+
+
+def test_band_excludes_just_under_two_percent():
+    k = np.ones((1, 3))
+    dem = np.array([1.9, 98.1, 0.0])
+
+    band = contribution_band(dem, k)
+
+    np.testing.assert_array_equal(band, [False, True, False])
+
+
+def test_band_is_union_over_filters():
+    # Filter A only sees bin 0, filter B only sees bin 2.
+    # Neither sees bin 1 -> bin 1 is out.
+    k = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 1.0]])
+    dem = np.array([1.0, 1.0, 1.0])
+
+    band = contribution_band(dem, k)
+
+    np.testing.assert_array_equal(band, [True, False, True])
+
+
+def test_band_can_have_gaps():
+    # Two-peaked DEM, one filter seeing every bin equally.
+    # Peaks in bins 0-1 and 4-5; bins 2-3 hold almost nothing.
+    k = np.ones((1, 6))
+    dem = np.array([50.0, 50.0, 0.001, 0.001, 50.0, 50.0])
+
+    band = contribution_band(dem, k)
+
+    np.testing.assert_array_equal(band, [True, True, False, False, True, True])
+
+
+def test_band_threshold_can_be_changed():
+    k = np.ones((1, 3))
+    dem = np.array([5.0, 90.0, 5.0])  # fractions 0.05, 0.90, 0.05
+
+    np.testing.assert_array_equal(contribution_band(dem, k, 0.02), [1, 1, 1])
+    np.testing.assert_array_equal(contribution_band(dem, k, 0.10), [0, 1, 0])

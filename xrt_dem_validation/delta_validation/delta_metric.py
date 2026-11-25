@@ -125,3 +125,76 @@ def sigma_from_mc(mc_dems):
     median = np.median(good, axis=0)
     sigma = np.median(np.abs(good - median), axis=0)
     return sigma, n_used
+
+
+def contribution_fractions(dem, forward_matrix):
+    """
+    Fraction of each filter's modeled signal that comes from each bin.
+
+        fraction[f, j] = DEM_j * K[f, j] / sum_k DEM_k * K[f, k]
+
+    where K = R_f(T_j) * T_j * dlnT is the same forward matrix the solver
+    uses (``pm_matrix`` in dem_solver.py), so sum_j DEM_j * K[f, j] is the
+    modeled intensity of filter f.
+
+    Parameters
+    ----------
+    dem : array-like, shape (n_T,)
+        DEM whose band is wanted (the solver's own DEM), linear units.
+    forward_matrix : array-like, shape (n_filters, n_T)
+        R(T) * T * dlnT on the same temperature grid.
+
+    Returns
+    -------
+    fractions : ndarray, shape (n_filters, n_T)
+        Each row sums to 1. A filter whose modeled signal is 0 gets a row
+        of zeros (it cannot select any bin).
+
+    Raises
+    ------
+    ValueError
+        If shapes do not match, or the DEM or matrix is not finite.
+    """
+    dem = np.asarray(dem, dtype=float)
+    forward_matrix = np.asarray(forward_matrix, dtype=float)
+
+    if forward_matrix.ndim != 2 or forward_matrix.shape[1] != dem.shape[0]:
+        raise ValueError(
+            "Shape mismatch: "
+            f"dem={dem.shape}, forward_matrix={forward_matrix.shape} "
+            "(expected forward_matrix shape (n_filters, n_T))"
+        )
+    if not (np.all(np.isfinite(dem)) and np.all(np.isfinite(forward_matrix))):
+        raise ValueError("DEM or forward matrix has non-finite values.")
+
+    signal = forward_matrix * dem  # (n_filters, n_T)
+    total = signal.sum(axis=1, keepdims=True)  # modeled intensity per filter
+
+    fractions = np.zeros_like(signal)
+    np.divide(signal, total, out=fractions, where=total > 0)
+    return fractions
+
+
+def contribution_band(dem, forward_matrix, threshold=0.02):
+    """
+    The "good" temperature bins for Delta.
+
+    A bin is good if it gives at least ``threshold`` (default 2%) of the
+    modeled signal in at least one filter. The band can have gaps (for
+    example a two-peaked DEM); bins are judged one at a time, as in the paper.
+
+    Parameters
+    ----------
+    dem : array-like, shape (n_T,)
+        The solver's own DEM (not the truth), linear units.
+    forward_matrix : array-like, shape (n_filters, n_T)
+        R(T) * T * dlnT on the same grid.
+    threshold : float, optional
+        Minimum fraction of a filter's signal. Default 0.02.
+
+    Returns
+    -------
+    band_mask : ndarray of bool, shape (n_T,)
+    """
+    fractions = contribution_fractions(dem, forward_matrix)
+    return np.any(fractions >= threshold, axis=0)
