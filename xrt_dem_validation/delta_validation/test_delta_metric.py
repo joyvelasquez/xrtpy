@@ -3,7 +3,6 @@ import pytest
 from delta_metric import compute_delta, sigma_from_mc
 
 
-
 def test_every_bin_off_by_one_sigma():
     # 4 bins, each off by exactly 1 sigma -> sqrt(4) / 4 = 0.5
     true = np.array([10.0, 20.0, 30.0, 40.0])
@@ -62,8 +61,6 @@ def test_zero_sigma_in_band_raises():
 def test_shape_mismatch_raises():
     with pytest.raises(ValueError, match="Shape mismatch"):
         compute_delta(np.ones(3), np.ones(4), np.ones(3), np.ones(3, dtype=bool))
-
-
 
 
 # ---------------------------------------------------------------------------

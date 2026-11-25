@@ -17,10 +17,15 @@ MC count stay the same as the rest of the synthetic validation campaign.
 - The band is computed **per solver** from that solver's own DEM: bins
   contributing ≥2% of the modeled signal in at least one filter.
 
+- σ uses MC rows 1–N only. A run with any inf/NaN value is a failed solve
+  and the whole run is dropped (not just the bad bins): a solve that blew
+  up in some bins can't be trusted in the others. The number of runs kept
+  is reported.
+
 ## Steps
 
 1. [x] `delta_metric.py`: `compute_delta()` plus tests
-2. [ ] σ per bin from the MC runs (`sigma_from_mc()`)
+2. [x] σ per bin from the MC runs (`sigma_from_mc()`)
 3. [ ] 2% band per solver (`contribution_band()`)
 4. [ ] Run script: Δ for all 162 DEMs × {XRTpy, IDL} → CSV
 5. [ ] Check Δ visually on a few DEMs
