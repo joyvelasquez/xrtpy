@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from delta_metric import compute_delta
 
 
