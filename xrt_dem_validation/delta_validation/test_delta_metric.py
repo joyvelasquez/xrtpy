@@ -1,6 +1,11 @@
 import numpy as np
 import pytest
-from delta_metric import compute_delta, sigma_from_mc
+from delta_metric import (
+    compute_delta,
+    contribution_band,
+    contribution_fractions,
+    sigma_from_mc,
+)
 
 
 def test_every_bin_off_by_one_sigma():
@@ -116,12 +121,6 @@ def test_sigma_needs_2d_input():
         sigma_from_mc(np.ones(5))
 
 
-from delta_metric import (
-    compute_delta,
-    contribution_band,
-    contribution_fractions,
-    sigma_from_mc,
-)
 
 # ---------------------------------------------------------------------------
 # contribution_fractions / contribution_band
