@@ -13,10 +13,13 @@ import pytest
 from delta_inputs import (
     IDL_BASE_DIR,
     IDL_BASE_PATTERN,
+    XRTPY_BASE_DIR,
     XRTPY_BASE_PATTERN,
     XRTPY_MC_PATTERN,
     _decode,
     _runs_by_T,
+    build_forward_matrix,
+    forward_check_dex,
     load_idl_base,
     load_idl_mc,
     load_true_dem,
@@ -125,3 +128,37 @@ def test_real_idl_matches_xrtpy_layout():
     assert mc["mc_dems"].shape == (1000, 26)  # row 0 dropped
     assert idl["dem"].dtype == np.float64  # 32-bit / big-endian converted
     np.testing.assert_allclose(idl["logT"], xrtpy["logT"], atol=1e-5)
+
+
+# ---------------------------------------------------------------------------
+# Forward matrix K
+# ---------------------------------------------------------------------------
+
+
+def test_forward_check_zero_when_model_matches():
+    K = np.array([[1.0, 2.0], [0.5, 0.5]])
+    dem = np.array([2.0, 1.0])
+
+    assert forward_check_dex(K, dem, K @ dem) == pytest.approx(0.0)
+    assert forward_check_dex(K, dem, 10 * (K @ dem)) == pytest.approx(1.0)
+
+
+def test_forward_check_nothing_to_check_is_nan():
+    K = np.ones((2, 2))
+    assert np.isnan(forward_check_dex(K, np.ones(2), np.zeros(2)))
+
+
+real_xrtpy_base = XRTPY_BASE_DIR / XRTPY_BASE_PATTERN.format(n=REAL_ID)
+
+
+@pytest.mark.skipif(
+    not real_xrtpy_base.exists(), reason="XRTpy base files not on this machine"
+)
+def test_real_forward_matrix_reproduces_xrtpy_model():
+    # K @ DEM must give back the modeled intensities the solver saved.
+    # If this fails, the 2% band would be built from the wrong responses.
+    base = load_xrtpy_base(REAL_ID)
+    K = build_forward_matrix(base["filters"], base["logT"])
+
+    assert K.shape == (14, 26)
+    assert forward_check_dex(K, base["dem"], base["modeled_intensities"]) < 1e-6

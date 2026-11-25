@@ -109,3 +109,82 @@ def load_idl_mc(dem_id, folder=IDL_MC_DIR):
         "logT": logT,
         "mc_dems": _runs_by_T(d["dem_out"], logT.size)[1:],
     }
+
+
+# ---------------------------------------------------------------------------
+# Forward matrix  K[f, j] = R_f(T_j) * T_j * dlnT
+# ---------------------------------------------------------------------------
+
+OBSERVATION_DATE = "2008-10-10T00:00:00"
+
+
+def build_forward_matrix(filters, logT, observation_date=OBSERVATION_DATE):
+    """
+    Build K = R(T) * T * dlnT on ``logT`` with the solver's own code.
+
+    Uses ``XRTDEMIterative.create_logT_grid()`` and
+    ``_interpolate_responses_to_grid()``, so K is the same matrix the solver
+    fits with (``pm_matrix`` in dem_solver.py). Building it here, instead of
+    reading it from a solver run, lets us apply it to the IDL DEMs too.
+
+    Parameters
+    ----------
+    filters : list of str
+        Filter names, in the order of the K rows you want back.
+    logT : array-like, shape (n_T,)
+        The DEM temperature grid (log10 K).
+    observation_date : str, optional
+        Date for the temperature responses. Default: the campaign date.
+
+    Returns
+    -------
+    ndarray, shape (n_filters, n_T)
+
+    Raises
+    ------
+    ValueError
+        If the solver's grid does not match ``logT``.
+    """
+    import warnings  # noqa: PLC0415
+
+    from xrtpy.response.tools import generate_temperature_responses  # noqa: PLC0415
+    from xrtpy.xrt_dem_iterative import XRTDEMIterative  # noqa: PLC0415
+
+    filters = list(filters)
+    logT = np.asarray(logT, dtype=float)
+    step = float(np.round(np.median(np.diff(logT)), 6))
+    responses = generate_temperature_responses(filters, observation_date)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=UserWarning)
+        solver = XRTDEMIterative(
+            observed_channel=filters,
+            observed_intensities=np.ones(len(filters)),
+            temperature_responses=responses,
+            minimum_bound_temperature=float(logT[0]),
+            maximum_bound_temperature=float(logT[-1]),
+            logarithmic_temperature_step_size=step,
+        )
+        solver.create_logT_grid()
+        solver._interpolate_responses_to_grid()
+
+    if not np.allclose(solver.logT, logT, atol=1e-5):
+        raise ValueError("Solver logT grid does not match the data logT grid.")
+
+    return solver.response_matrix * solver.T.to_value("K") * solver.dlnT
+
+
+def forward_check_dex(forward_matrix, dem, modeled_intensities):
+    """
+    Largest |log10(K @ dem / saved modeled intensity)| over filters, in dex.
+
+    About 0 means K reproduces the modeled intensities the solver saved,
+    so K is the solver's own matrix. Filters where either value is <= 0
+    are skipped. NaN if nothing can be checked.
+    """
+    model = np.asarray(forward_matrix, dtype=float) @ np.asarray(dem, dtype=float)
+    saved = np.asarray(modeled_intensities, dtype=float)
+    ok = (saved > 0) & (model > 0) & np.isfinite(model) & np.isfinite(saved)
+    if not ok.any():
+        return np.nan
+    return float(np.max(np.abs(np.log10(model[ok] / saved[ok]))))
