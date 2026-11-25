@@ -77,3 +77,51 @@ def compute_delta(dem_true, dem_calc, sigma, band_mask):
     chi2_dem = np.sum(((t - c) / s) ** 2)
     delta = np.sqrt(chi2_dem) / n_temp
     return float(delta), n_temp
+
+
+def sigma_from_mc(mc_dems):
+    """
+    Per-bin DEM uncertainty from the Monte Carlo solutions.
+
+        sigma_i = median( |DEM_mc,i - median(DEM_mc,i)| )
+
+    This is the plain median absolute deviation (no 1.4826 factor), as the
+    paper describes it.
+
+    Pass only the Monte Carlo rows (rows 1..N of the saved arrays). Row 0
+    is the unperturbed solve and is not part of the spread.
+
+    A Monte Carlo run with any non-finite value (inf or NaN) is a failed
+    solve. The whole run is dropped before the median is taken, and the
+    number of runs actually used is returned so the drop is visible.
+
+    Parameters
+    ----------
+    mc_dems : array-like, shape (n_runs, n_T)
+        Monte Carlo DEM solutions, linear DEM units.
+
+    Returns
+    -------
+    sigma : ndarray, shape (n_T,)
+        Median absolute deviation in each temperature bin.
+    n_used : int
+        Number of Monte Carlo runs used (finite runs only).
+
+    Raises
+    ------
+    ValueError
+        If the input is not 2-D or no run is fully finite.
+    """
+    mc_dems = np.asarray(mc_dems, dtype=float)
+    if mc_dems.ndim != 2:
+        raise ValueError(f"mc_dems must be 2-D (n_runs, n_T); got {mc_dems.shape}")
+
+    finite_runs = np.all(np.isfinite(mc_dems), axis=1)
+    n_used = int(finite_runs.sum())
+    if n_used == 0:
+        raise ValueError("No Monte Carlo run is fully finite; cannot compute sigma.")
+
+    good = mc_dems[finite_runs]
+    median = np.median(good, axis=0)
+    sigma = np.median(np.abs(good - median), axis=0)
+    return sigma, n_used
